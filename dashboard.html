@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CurePd Rx - Doctor Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .prescription-row:hover { background-color: #f9fafb; cursor: pointer; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <nav class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <i class="fas fa-prescription-bottle text-2xl text-indigo-600"></i>
+                <span class="font-bold text-xl text-gray-800">CurePd Rx</span>
+                <span class="text-sm text-gray-500 ml-2">Doctor Panel</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="text-sm text-gray-600"><i class="fas fa-user-md mr-1"></i> Dr. Demo</span>
+                <a href="index.html" class="text-red-500 hover:text-red-700 text-sm"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Action Bar -->
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">My Prescriptions</h1>
+            <a href="new-prescription.html" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg flex items-center gap-2 transition">
+                <i class="fas fa-plus"></i> New Prescription
+            </a>
+        </div>
+
+        <!-- Search Box -->
+        <div class="mb-6 relative">
+            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            <input type="text" id="searchInput" placeholder="Search by patient name or phone..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+        </div>
+
+        <!-- Prescriptions Table -->
+        <div class="bg-white rounded-xl shadow overflow-hidden">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="prescriptionsTableBody" class="divide-y divide-gray-200">
+                    <!-- Dynamic rows will appear here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Demo empty state message (shown if no prescriptions) -->
+        <div id="emptyState" class="text-center py-12 hidden">
+            <i class="fas fa-notes-medical text-5xl text-gray-300 mb-3"></i>
+            <p class="text-gray-500">No prescriptions yet. Click "New Prescription" to create your first one.</p>
+        </div>
+    </main>
+
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

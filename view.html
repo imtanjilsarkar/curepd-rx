@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CurePd Rx - View Prescription</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .prescription-card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        @media print {
+            body { background: white; padding: 0; margin: 0; }
+            .no-print { display: none !important; }
+            .prescription-card { box-shadow: none; padding: 0; margin: 0; }
+        }
+    </style>
+</head>
+<body class="p-4">
+    <!-- Action buttons (no-print) -->
+    <div class="max-w-4xl mx-auto mb-4 no-print">
+        <div class="flex justify-between items-center flex-wrap gap-2">
+            <a href="dashboard.html" class="text-indigo-600 hover:text-indigo-800">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+            <div class="flex gap-2">
+                <button id="downloadPdfBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow text-sm">
+                    <i class="fas fa-download"></i> Download PDF
+                </button>
+                <button onclick="window.print()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg shadow text-sm">
+                    <i class="fas fa-print"></i> Print
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prescription content will be injected here -->
+    <div id="prescriptionContainer" class="prescription-card">
+        <div class="text-center py-8">
+            <i class="fas fa-spinner fa-spin text-3xl text-indigo-500"></i>
+            <p class="mt-2 text-gray-500">Loading prescription...</p>
+        </div>
+    </div>
+
+    <script>
+        // Get prescription ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const prescriptionId = urlParams.get('id');
+
+        // Load ONLY from localStorage – correct key is 'curepd_prescriptions'
+        function getPrescriptionById(id) {
+            const stored = localStorage.getItem('curepd_prescriptions');  // Fixed key
+            if (stored) {
+                const prescriptions = JSON.parse(stored);
+                return prescriptions.find(p => p.id === id);
+            }
+            return null;
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        // Render prescription HTML
+        function renderPrescription(pres) {
+            if (!pres) {
+                return `
+                    <div class="text-center py-8 text-red-600">
+                        <i class="fas fa-exclamation-triangle text-5xl mb-3"></i>
+                        <h2 class="text-xl font-bold">Prescription Not Found</h2>
+                        <p class="mt-2">The prescription ID "${prescriptionId}" does not exist.</p>
+                        <p class="text-sm text-gray-500 mt-1">Make sure you have saved the prescription first.</p>
+                        <a href="dashboard.html" class="inline-block mt-4 text-indigo-600 underline">Go to Dashboard</a>
+                    </div>
+                `;
+            }
+
+            // Build medicines table
+            let medicinesHtml = '';
+            if (pres.medicines && pres.medicines.length > 0) {
+                medicinesHtml = `
+                    <table class="w-full text-sm border-collapse">
+                        <thead>
+                            <tr class="border-b border-gray-200 bg-gray-50">
+                                <th class="text-left py-2 px-2">Medicine</th>
+                                <th class="text-left py-2 px-2">Dosage</th>
+                                <th class="text-left py-2 px-2">Duration</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${pres.medicines.map(m => `
+                                <tr class="border-b border-gray-100">
+                                    <td class="py-2 px-2 font-medium">${escapeHtml(m.name)}</td>
+                                    <td class="py-2 px-2">${escapeHtml(m.dose || '—')}</td>
+                                    <td class="py-2 px-2">${escapeHtml(m.duration || '—')}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } else {
+                medicinesHtml = '<p class="text-gray-500 italic">No medicines prescribed.</p>';
+            }
+
+            // Doctor info (static for demo – you can later make this dynamic)
+            const doctorName = "Dr. Demo User";
+            const doctorReg = "BMDC Reg: DEMO123";
+            const clinic = "Dhaka Medical Clinic";
+
+            return `
+                <div class="border-b border-gray-200 pb-4 mb-4 flex justify-between items-start flex-wrap">
+                    <div>
+                        <h1 class="text-2xl font-bold text-indigo-700">CurePd Rx</h1>
+                        <p class="text-sm text-gray-500">Digital Prescription System</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm font-semibold">${doctorName}</p>
+                        <p class="text-xs text-gray-500">${doctorReg}</p>
+                        <p class="text-xs text-gray-500">${clinic}</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 bg-gray-50 p-3 rounded-lg">
+                    <div>
+                        <span class="text-xs font-semibold text-gray-600 uppercase">Patient Name</span>
+                        <p class="font-medium">${escapeHtml(pres.patientName)}</p>
+                    </div>
+                    <div>
+                        <span class="text-xs font-semibold text-gray-600 uppercase">Age</span>
+                        <p>${escapeHtml(pres.patientAge || '—')}</p>
+                    </div>
+                    <div>
+                        <span class="text-xs font-semibold text-gray-600 uppercase">Phone</span>
+                        <p>${escapeHtml(pres.patientPhone || '—')}</p>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">Prescribed Medicines</h3>
+                    ${medicinesHtml}
+                </div>
+
+                ${pres.advice ? `
+                <div class="mb-6">
+                    <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">Advice / Instructions</h3>
+                    <div class="bg-gray-50 p-3 rounded-lg text-gray-700">
+                        ${escapeHtml(pres.advice)}
+                    </div>
+                </div>
+                ` : ''}
+
+                <div class="border-t border-gray-200 pt-4 flex justify-between items-center text-sm text-gray-500">
+                    <div>
+                        <p>Digitally generated prescription</p>
+                        <p class="text-xs">Valid without signature</p>
+                    </div>
+                    <div class="text-right">
+                        <p>Date: ${pres.date || new Date().toLocaleDateString('en-GB')}</p>
+                        <p class="text-xs">Prescription ID: ${pres.id}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Load and display
+        function loadAndDisplay() {
+            const container = document.getElementById('prescriptionContainer');
+            if (!prescriptionId) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-red-600">
+                        <i class="fas fa-question-circle text-5xl mb-3"></i>
+                        <h2 class="text-xl font-bold">No Prescription ID Provided</h2>
+                        <p class="mt-2">Please use a valid link like <code class="bg-gray-100 px-1">?id=RX-123</code></p>
+                        <a href="dashboard.html" class="inline-block mt-4 text-indigo-600 underline">Go to Dashboard</a>
+                    </div>
+                `;
+                return;
+            }
+            const prescription = getPrescriptionById(prescriptionId);
+            container.innerHTML = renderPrescription(prescription);
+            
+            if (prescription) {
+                const pdfBtn = document.getElementById('downloadPdfBtn');
+                if (pdfBtn) {
+                    pdfBtn.addEventListener('click', () => {
+                        const element = document.getElementById('prescriptionContainer');
+                        const opt = {
+                            margin: [0.5, 0.5, 0.5, 0.5],
+                            filename: `CurePdRx_${prescription.patientName.replace(/\s/g, '_')}_${prescription.id}.pdf`,
+                            image: { type: 'jpeg', quality: 0.98 },
+                            html2canvas: { scale: 2, letterRendering: true },
+                            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+                        };
+                        html2pdf().set(opt).from(element).save();
+                    });
+                }
+            } else {
+                const pdfBtn = document.getElementById('downloadPdfBtn');
+                if (pdfBtn) pdfBtn.disabled = true;
+            }
+        }
+
+        loadAndDisplay();
+    </script>
+</body>
+</html>
