@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CurePd Rx - Sign Up</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
+        <div class="text-center mb-6">
+            <i class="fas fa-user-plus text-4xl text-indigo-600 mb-2"></i>
+            <h1 class="text-2xl font-bold text-gray-800">Doctor Sign Up</h1>
+            <p class="text-gray-500 text-sm">Join CurePd Rx</p>
+        </div>
+
+        <form id="signupForm" class="space-y-4">
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">Full Name</label>
+                <input type="text" id="name" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" required>
+            </div>
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">Email</label>
+                <input type="email" id="email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" required>
+            </div>
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">Password</label>
+                <input type="password" id="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" required>
+            </div>
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">Clinic Name</label>
+                <input type="text" id="clinic" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">BMDC Registration (optional)</label>
+                <input type="text" id="registration" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-lg transition">
+                <i class="fas fa-user-plus"></i> Sign Up
+            </button>
+        </form>
+        <p class="text-center text-sm text-gray-500 mt-4">
+            Already have an account? <a href="index.html" class="text-indigo-600">Login</a>
+        </p>
+    </div>
+
+    <script type="module" src="js/auth.js"></script>
+</body>
+</html>

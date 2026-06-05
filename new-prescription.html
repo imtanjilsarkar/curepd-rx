@@ -119,6 +119,50 @@
         </div>
     </div>
 
-    <script src="js/prescription.js"></script>
+    <script type="module">
+    import { auth, db } from './js/firebase-init.js';
+    import { collection, addDoc } from "firebase/firestore";
+    import { onAuthStateChanged } from "firebase/auth";
+
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+            alert("You must be logged in.");
+            window.location.href = "index.html";
+            return;
+        }
+
+        document.getElementById('savePrescriptionBtn').addEventListener('click', async () => {
+            const patientName = document.getElementById('patientName').value.trim();
+            if (!patientName) {
+                alert("Enter patient name");
+                return;
+            }
+            const medicines = [];
+            document.querySelectorAll('.medicine-row').forEach(row => {
+                const name = row.querySelector('.medicine-name').value;
+                const dose = row.querySelector('.medicine-dose').value;
+                const duration = row.querySelector('.medicine-duration').value;
+                if (name) medicines.push({ name, dose, duration });
+            });
+            const prescription = {
+                doctorId: user.uid,
+                patientName,
+                patientAge: document.getElementById('patientAge').value,
+                patientPhone: document.getElementById('patientPhone').value,
+                advice: document.getElementById('advice').value,
+                medicines,
+                date: new Date().toISOString().split('T')[0],
+                createdAt: new Date()
+            };
+            try {
+                await addDoc(collection(db, "prescriptions"), prescription);
+                alert("Prescription saved to cloud!");
+                window.location.href = "dashboard.html";
+            } catch (error) {
+                alert("Error: " + error.message);
+            }
+        });
+    });
+</script>
 </body>
 </html>
