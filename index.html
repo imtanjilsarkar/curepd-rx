@@ -3,103 +3,415 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CurePd Rx - Doctor Login</title>
+    <title>CurePd Rx — Doctor Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Firebase CDN -->
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="js/firebase-init.js"></script>
+    <style>
+        :root {
+            --navy: #0d1b2a;
+            --navy-mid: #162032;
+            --teal: #0fa99e;
+            --teal-light: #13c4b8;
+            --gold: #e8c97d;
+            --text-main: #1a2332;
+            --text-muted: #6b7a8d;
+            --border: #e0e6ef;
+            --bg: #f4f7fb;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            display: flex;
+            align-items: stretch;
+        }
+
+        /* LEFT PANEL */
+        .left-panel {
+            width: 44%;
+            background: var(--navy);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 56px 60px;
+            overflow: hidden;
+        }
+        .left-panel .grid-lines {
+            position: absolute; inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+            background-size: 52px 52px;
+        }
+        .left-panel .glow-top {
+            position: absolute; top: -100px; right: -80px;
+            width: 340px; height: 340px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(15,169,158,0.2) 0%, transparent 70%);
+        }
+        .left-panel .glow-bot {
+            position: absolute; bottom: -80px; left: -60px;
+            width: 260px; height: 260px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(232,201,125,0.10) 0%, transparent 70%);
+        }
+        .panel-content { position: relative; z-index: 1; }
+
+        .brand-row {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 52px;
+        }
+        .brand-icon {
+            width: 46px; height: 46px;
+            background: var(--teal);
+            border-radius: 13px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; color: white;
+        }
+        .brand-name {
+            font-family: 'DM Serif Display', serif;
+            font-size: 24px; color: white; letter-spacing: 0.3px;
+        }
+        .brand-name span { color: var(--teal-light); }
+
+        .tagline {
+            font-family: 'DM Serif Display', serif;
+            font-size: 40px; line-height: 1.18; color: white;
+            margin-bottom: 18px;
+        }
+        .tagline em { color: var(--teal-light); font-style: italic; }
+
+        .sub-tagline {
+            font-size: 15px; font-weight: 300;
+            color: rgba(255,255,255,0.50);
+            line-height: 1.75; margin-bottom: 48px;
+        }
+
+        /* Stats row */
+        .stats-row {
+            display: grid; grid-template-columns: 1fr 1fr 1fr;
+            gap: 1px; background: rgba(255,255,255,0.07);
+            border-radius: 14px; overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.07);
+        }
+        .stat-box {
+            padding: 18px 16px;
+            background: rgba(255,255,255,0.03);
+        }
+        .stat-num {
+            font-family: 'DM Serif Display', serif;
+            font-size: 28px; color: var(--teal-light);
+            line-height: 1;
+        }
+        .stat-label {
+            font-size: 11px; font-weight: 400;
+            color: rgba(255,255,255,0.38);
+            margin-top: 4px;
+        }
+
+        .panel-footer {
+            margin-top: 48px;
+            font-size: 11px; color: rgba(255,255,255,0.18);
+            font-weight: 300;
+        }
+
+        /* RIGHT PANEL */
+        .right-panel {
+            flex: 1;
+            display: flex; align-items: center; justify-content: center;
+            padding: 48px 40px;
+        }
+        .form-card { width: 100%; max-width: 420px; }
+
+        .form-card h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 32px; color: var(--text-main);
+            margin-bottom: 6px;
+        }
+        .form-card .sub {
+            font-size: 14px; color: var(--text-muted);
+            margin-bottom: 36px;
+        }
+
+        /* Alert banners */
+        .alert {
+            display: none; align-items: center; gap: 10px;
+            padding: 12px 16px; border-radius: 10px;
+            font-size: 13px; margin-bottom: 20px;
+        }
+        .alert.show { display: flex; }
+        .alert-error { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; }
+        .alert-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #16a34a; }
+
+        /* Fields */
+        .field { margin-bottom: 18px; }
+        .field label {
+            display: block; font-size: 12px; font-weight: 600;
+            color: var(--text-main); margin-bottom: 7px;
+            letter-spacing: 0.2px;
+        }
+        .field .input-wrap { position: relative; }
+        .field .input-wrap i.prefix {
+            position: absolute; left: 14px; top: 50%;
+            transform: translateY(-50%);
+            font-size: 13px; color: var(--text-muted); pointer-events: none;
+        }
+        .field input {
+            width: 100%; height: 48px;
+            border: 1.5px solid var(--border);
+            border-radius: 11px;
+            padding: 0 42px 0 42px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px; color: var(--text-main);
+            background: white; outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .field input:focus {
+            border-color: var(--teal);
+            box-shadow: 0 0 0 3px rgba(15,169,158,0.12);
+        }
+        .toggle-pw {
+            position: absolute; right: 14px; top: 50%;
+            transform: translateY(-50%);
+            font-size: 13px; color: var(--text-muted);
+            cursor: pointer; z-index: 2;
+        }
+
+        .forgot-row {
+            text-align: right; margin-top: -10px; margin-bottom: 22px;
+        }
+        .forgot-row a {
+            font-size: 12px; color: var(--teal); text-decoration: none;
+            font-weight: 500;
+        }
+
+        /* Submit btn */
+        .submit-btn {
+            width: 100%; height: 50px;
+            background: var(--teal); color: white;
+            border: none; border-radius: 12px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px; font-weight: 600;
+            cursor: pointer; letter-spacing: 0.3px;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            box-shadow: 0 4px 16px rgba(15,169,158,0.28);
+            transition: all 0.2s;
+        }
+        .submit-btn:hover {
+            background: var(--teal-light);
+            box-shadow: 0 6px 22px rgba(15,169,158,0.38);
+            transform: translateY(-1px);
+        }
+        .submit-btn:disabled { opacity: 0.6; pointer-events: none; }
+
+        /* Divider */
+        .divider {
+            display: flex; align-items: center; gap: 12px;
+            margin: 22px 0;
+        }
+        .divider::before, .divider::after {
+            content: ''; flex: 1; height: 1px; background: var(--border);
+        }
+        .divider span { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+
+        /* Google btn */
+        .google-btn {
+            width: 100%; height: 48px;
+            background: white; border: 1.5px solid var(--border);
+            border-radius: 12px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px; font-weight: 500; color: var(--text-main);
+            transition: all 0.2s;
+        }
+        .google-btn:hover {
+            border-color: #b0b0b0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        .google-btn img { width: 18px; height: 18px; }
+
+        .signup-link {
+            text-align: center; margin-top: 24px;
+            font-size: 13px; color: var(--text-muted);
+        }
+        .signup-link a { color: var(--teal); font-weight: 600; text-decoration: none; }
+
+        @media (max-width: 768px) {
+            .left-panel { display: none; }
+            .right-panel { padding: 40px 20px; }
+        }
+    </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
-    <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
-        <div class="text-center mb-8">
-            <i class="fas fa-prescription-bottle text-5xl text-indigo-600 mb-3"></i>
-            <h1 class="text-3xl font-bold text-gray-800">CurePd Rx</h1>
-            <p class="text-gray-500 mt-2">Digital Prescription for Modern Doctors</p>
-        </div>
-        
-        <form id="loginForm" class="space-y-5">
-            <div>
-                <label class="block text-gray-700 font-medium mb-1">Doctor Email</label>
-                <input type="email" id="email" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="doctor@clinic.com" required>
+<body>
+
+    <!-- LEFT -->
+    <div class="left-panel">
+        <div class="grid-lines"></div>
+        <div class="glow-top"></div>
+        <div class="glow-bot"></div>
+        <div class="panel-content">
+            <div class="brand-row">
+                <div class="brand-icon"><i class="fas fa-prescription-bottle-alt"></i></div>
+                <div class="brand-name">CurePd <span>Rx</span></div>
             </div>
-            <div>
-                <label class="block text-gray-700 font-medium mb-1">Password</label>
-                <input type="password" id="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="••••••" required>
-                <div class="text-right mt-1">
-                    <a href="#" id="forgotPassword" class="text-xs text-indigo-600 hover:underline">Forgot password?</a>
+            <div class="tagline">
+                The <em>smarter</em> way<br>to prescribe<br>in Bangladesh.
+            </div>
+            <div class="sub-tagline">
+                Digital prescriptions, QR sharing, AI validation —<br>
+                all in one simple platform built for Bangladeshi doctors.
+            </div>
+            <div class="stats-row">
+                <div class="stat-box">
+                    <div class="stat-num">100%</div>
+                    <div class="stat-label">Free to use</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num">0৳</div>
+                    <div class="stat-label">Zero cost</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num">AI</div>
+                    <div class="stat-label">Medicine check</div>
                 </div>
             </div>
-            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-lg">Login</button>
-        </form>
+            <div class="panel-footer">© 2025 CurePd Rx · Dhaka, Bangladesh</div>
+        </div>
+    </div>
 
-        <button type="button" id="googleSignInBtn" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-lg mt-3">Sign in with Google</button>
+    <!-- RIGHT -->
+    <div class="right-panel">
+        <div class="form-card">
+            <h1>Welcome back</h1>
+            <p class="sub">Sign in to your CurePd Rx doctor account.</p>
 
-        <hr class="my-4">
-        <p class="text-center text-sm text-gray-500">Don't have an account? <a href="signup.html" class="text-indigo-600">Sign up</a></p>
+            <div class="alert alert-error" id="errAlert">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="errText">Something went wrong.</span>
+            </div>
+
+            <form id="loginForm" novalidate>
+                <div class="field">
+                    <label>Email Address</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-envelope prefix"></i>
+                        <input type="email" id="email" placeholder="doctor@clinic.com" autocomplete="email" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Password</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-lock prefix"></i>
+                        <input type="password" id="password" placeholder="Your password" autocomplete="current-password" required>
+                        <i class="fas fa-eye toggle-pw" id="togglePw"></i>
+                    </div>
+                </div>
+
+                <div class="forgot-row">
+                    <a href="#" id="forgotLink">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="submit-btn" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i> Sign In
+                </button>
+            </form>
+
+            <div class="divider"><span>or continue with</span></div>
+
+            <button class="google-btn" id="googleBtn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                Sign in with Google
+            </button>
+
+            <div class="signup-link">
+                New to CurePd Rx? <a href="signup.html">Create doctor account →</a>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Wait for Firebase to be ready
-        document.addEventListener('DOMContentLoaded', () => {
-            const loginForm = document.getElementById('loginForm');
-            const emailInput = document.getElementById('email');
-            const passwordInput = document.getElementById('password');
-            const googleBtn = document.getElementById('googleSignInBtn');
-            const forgotLink = document.getElementById('forgotPassword');
-
-            // Email/Password Login
-            loginForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const email = emailInput.value.trim();
-                const password = passwordInput.value;
-                if (!email || !password) {
-                    alert("Please enter both email and password.");
-                    return;
-                }
-                try {
-                    await auth.signInWithEmailAndPassword(email, password);
-                    window.location.href = "dashboard.html";
-                } catch (error) {
-                    alert("Login failed: " + error.message);
-                }
-            });
-
-            // Google Sign-In (with popup – ensure only one click)
-            googleBtn.addEventListener('click', async () => {
-                // Disable button temporarily to prevent multiple clicks
-                googleBtn.disabled = true;
-                try {
-                    const result = await auth.signInWithPopup(googleProvider);
-                    // After successful login, redirect
-                    window.location.href = "dashboard.html";
-                } catch (error) {
-                    if (error.code !== 'auth/cancelled-popup-request') {
-                        alert("Google sign-in failed: " + error.message);
-                    }
-                    googleBtn.disabled = false;
-                }
-            });
-
-            // Forgot Password
-            forgotLink.addEventListener('click', async (e) => {
-                e.preventDefault();
-                const email = prompt("Enter your email address to reset password:");
-                if (email && email.includes('@')) {
-                    try {
-                        await auth.sendPasswordResetEmail(email);
-                        alert("Password reset email sent! Check your inbox.");
-                    } catch (error) {
-                        alert("Error: " + error.message);
-                    }
-                } else if (email) {
-                    alert("Please enter a valid email address.");
-                }
-            });
+        // Toggle password
+        document.getElementById('togglePw').addEventListener('click', function () {
+            const inp = document.getElementById('password');
+            inp.type = inp.type === 'password' ? 'text' : 'password';
+            this.className = `fas fa-${inp.type === 'password' ? 'eye' : 'eye-slash'} toggle-pw`;
         });
+
+        function showError(msg) {
+            document.getElementById('errText').textContent = msg;
+            document.getElementById('errAlert').classList.add('show');
+        }
+        function setLoading(on) {
+            const btn = document.getElementById('loginBtn');
+            btn.disabled = on;
+            btn.innerHTML = on
+                ? '<i class="fas fa-spinner fa-pulse"></i> Signing in...'
+                : '<i class="fas fa-sign-in-alt"></i> Sign In';
+        }
+
+        // Email login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            if (!email || !password) { showError('Please enter your email and password.'); return; }
+            setLoading(true);
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                window.location.href = 'dashboard.html';
+            } catch (err) {
+                setLoading(false);
+                const codes = {
+                    'auth/user-not-found': 'No account found with this email.',
+                    'auth/wrong-password': 'Incorrect password. Please try again.',
+                    'auth/too-many-requests': 'Too many attempts. Please try again later.',
+                    'auth/invalid-email': 'Invalid email address format.'
+                };
+                showError(codes[err.code] || 'Login failed: ' + err.message);
+            }
+        });
+
+        // Google login
+        document.getElementById('googleBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('googleBtn');
+            btn.disabled = true;
+            try {
+                const result = await auth.signInWithPopup(googleProvider);
+                const user = result.user;
+                const docSnap = await db.collection('doctors').doc(user.uid).get();
+                if (!docSnap.exists) {
+                    await db.collection('doctors').doc(user.uid).set({
+                        name: user.displayName || '',
+                        email: user.email,
+                        registration: '', speciality: '', clinic: '', phone: '',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+                window.location.href = 'dashboard.html';
+            } catch (err) {
+                if (err.code !== 'auth/cancelled-popup-request') showError('Google sign-in failed: ' + err.message);
+                btn.disabled = false;
+            }
+        });
+
+        // Forgot password
+        document.getElementById('forgotLink').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const email = prompt('Enter your registered email address:');
+            if (!email) return;
+            try {
+                await auth.sendPasswordResetEmail(email.trim());
+                alert('✅ Password reset email sent! Check your inbox.');
+            } catch (err) { showError('Could not send reset email: ' + err.message); }
+        });
+
+        // Auto-redirect if already logged in
+        auth.onAuthStateChanged(user => { if (user) window.location.href = 'dashboard.html'; });
     </script>
 </body>
 </html>

@@ -3,89 +3,461 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CurePd Rx - Dashboard</title>
+    <title>CurePd Rx — Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="js/firebase-init.js"></script>
+    <style>
+        :root {
+            --navy: #0d1b2a; --navy-mid: #162032; --teal: #0fa99e;
+            --teal-light: #13c4b8; --gold: #e8c97d;
+            --text-main: #1a2332; --text-muted: #6b7a8d;
+            --border: #e0e6ef; --bg: #f4f7fb; --white: #ffffff;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'DM Sans', sans-serif; background: var(--bg); min-height: 100vh; }
+
+        /* ── NAVBAR ── */
+        .navbar {
+            background: var(--navy);
+            height: 64px;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 32px;
+            position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+        }
+        .nav-brand {
+            display: flex; align-items: center; gap: 10px;
+        }
+        .nav-brand-icon {
+            width: 34px; height: 34px; background: var(--teal);
+            border-radius: 9px; display: flex; align-items: center;
+            justify-content: center; font-size: 15px; color: white;
+        }
+        .nav-brand-name {
+            font-family: 'DM Serif Display', serif;
+            font-size: 20px; color: white;
+        }
+        .nav-brand-name span { color: var(--teal-light); }
+
+        .nav-right {
+            display: flex; align-items: center; gap: 20px;
+        }
+        .nav-doctor {
+            display: flex; align-items: center; gap: 8px;
+            color: rgba(255,255,255,0.75); font-size: 13px;
+        }
+        .nav-avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: rgba(15,169,158,0.25);
+            border: 1.5px solid rgba(15,169,158,0.5);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; color: var(--teal-light); font-weight: 600;
+        }
+        .nav-logout {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 8px;
+            padding: 6px 14px;
+            color: rgba(255,255,255,0.65);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 12px; cursor: pointer;
+            transition: all 0.2s;
+        }
+        .nav-logout:hover { background: rgba(239,68,68,0.15); color: #fca5a5; border-color: rgba(239,68,68,0.3); }
+
+        /* ── MAIN LAYOUT ── */
+        .main { max-width: 1100px; margin: 0 auto; padding: 36px 24px; }
+
+        /* Welcome bar */
+        .welcome-bar {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 28px; flex-wrap: wrap; gap: 16px;
+        }
+        .welcome-text h2 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 26px; color: var(--text-main);
+        }
+        .welcome-text p { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+        .new-rx-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--teal); color: white;
+            padding: 12px 22px; border-radius: 12px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px; font-weight: 600;
+            text-decoration: none;
+            box-shadow: 0 4px 14px rgba(15,169,158,0.3);
+            transition: all 0.2s;
+        }
+        .new-rx-btn:hover {
+            background: var(--teal-light);
+            box-shadow: 0 6px 20px rgba(15,169,158,0.4);
+            transform: translateY(-1px);
+        }
+
+        /* ── STATS ROW ── */
+        .stats-row {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 16px; margin-bottom: 28px;
+        }
+        .stat-card {
+            background: white; border-radius: 14px;
+            padding: 20px 22px;
+            border: 1px solid var(--border);
+            display: flex; align-items: center; gap: 16px;
+            transition: box-shadow 0.2s;
+        }
+        .stat-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+        .stat-icon {
+            width: 44px; height: 44px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; flex-shrink: 0;
+        }
+        .stat-icon.teal { background: rgba(15,169,158,0.1); color: var(--teal); }
+        .stat-icon.blue { background: rgba(59,130,246,0.1); color: #3b82f6; }
+        .stat-icon.amber { background: rgba(245,158,11,0.1); color: #f59e0b; }
+        .stat-icon.purple { background: rgba(139,92,246,0.1); color: #8b5cf6; }
+        .stat-num {
+            font-family: 'DM Serif Display', serif;
+            font-size: 26px; color: var(--text-main); line-height: 1;
+        }
+        .stat-lbl { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+
+        /* ── CONTENT AREA ── */
+        .content-area {
+            background: white; border-radius: 16px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+        .content-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 12px;
+        }
+        .content-header h3 {
+            font-size: 16px; font-weight: 600; color: var(--text-main);
+        }
+        .content-header p { font-size: 12px; color: var(--text-muted); }
+
+        .search-wrap {
+            position: relative;
+        }
+        .search-wrap i {
+            position: absolute; left: 12px; top: 50%;
+            transform: translateY(-50%);
+            font-size: 13px; color: var(--text-muted);
+        }
+        #searchInput {
+            width: 260px; height: 38px;
+            border: 1.5px solid var(--border);
+            border-radius: 9px;
+            padding: 0 12px 0 36px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px; color: var(--text-main);
+            outline: none; transition: border-color 0.2s;
+            background: var(--bg);
+        }
+        #searchInput:focus { border-color: var(--teal); background: white; }
+
+        /* Table */
+        table { width: 100%; border-collapse: collapse; }
+        thead tr { background: var(--bg); }
+        thead th {
+            padding: 12px 20px;
+            text-align: left;
+            font-size: 11px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.8px;
+            color: var(--text-muted);
+        }
+        tbody tr {
+            border-top: 1px solid var(--border);
+            transition: background 0.15s;
+        }
+        tbody tr:hover { background: #fafbfd; }
+        tbody td {
+            padding: 14px 20px;
+            font-size: 13px; color: var(--text-main);
+            vertical-align: middle;
+        }
+
+        /* Patient avatar in table */
+        .patient-cell { display: flex; align-items: center; gap: 10px; }
+        .patient-ava {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: rgba(15,169,158,0.1);
+            border: 1.5px solid rgba(15,169,158,0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 600; color: var(--teal);
+            flex-shrink: 0;
+        }
+        .patient-name { font-weight: 500; }
+        .patient-phone { font-size: 12px; color: var(--text-muted); }
+
+        /* Date badge */
+        .date-badge {
+            font-size: 12px; color: var(--text-muted);
+        }
+
+        /* View btn */
+        .view-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(15,169,158,0.08);
+            color: var(--teal);
+            border: 1px solid rgba(15,169,158,0.2);
+            border-radius: 8px; padding: 6px 14px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 12px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .view-btn:hover { background: var(--teal); color: white; border-color: var(--teal); }
+
+        /* Empty state */
+        .empty-state {
+            display: none; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 64px 24px; color: var(--text-muted);
+        }
+        .empty-state i { font-size: 48px; margin-bottom: 16px; color: var(--border); }
+        .empty-state h4 { font-size: 16px; font-weight: 600; color: var(--text-main); margin-bottom: 6px; }
+        .empty-state p { font-size: 13px; text-align: center; line-height: 1.6; }
+        .empty-state a {
+            margin-top: 20px; background: var(--teal); color: white;
+            padding: 10px 22px; border-radius: 10px;
+            text-decoration: none; font-size: 13px; font-weight: 600;
+        }
+
+        /* Loading row */
+        .loading-row td {
+            text-align: center; padding: 40px;
+            color: var(--text-muted); font-size: 13px;
+        }
+
+        @media (max-width: 768px) {
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+            #searchInput { width: 200px; }
+            .navbar { padding: 0 16px; }
+            .main { padding: 20px 12px; }
+        }
+    </style>
 </head>
-<body class="bg-gray-50">
-    <nav class="bg-white shadow-sm border-b px-4 py-3 flex justify-between items-center">
-        <div class="flex items-center gap-2">
-            <i class="fas fa-prescription-bottle text-2xl text-indigo-600"></i>
-            <span class="font-bold text-xl">CurePd Rx</span>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <div class="nav-brand-icon"><i class="fas fa-prescription-bottle-alt"></i></div>
+            <div class="nav-brand-name">CurePd <span>Rx</span></div>
         </div>
-        <div class="flex items-center gap-4">
-            <span id="doctorName" class="text-gray-600"><i class="fas fa-user-md"></i> Loading...</span>
-            <button id="logoutBtn" class="text-red-500 hover:text-red-700">Logout</button>
+        <div class="nav-right">
+            <div class="nav-doctor">
+                <div class="nav-avatar" id="navAvatar">?</div>
+                <span id="navDoctorName">Loading...</span>
+            </div>
+            <button class="nav-logout" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
         </div>
     </nav>
 
-    <main class="max-w-6xl mx-auto px-4 py-8">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold">My Prescriptions</h1>
-            <a href="new-prescription.html" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">+ New Prescription</a>
+    <!-- MAIN -->
+    <main class="main">
+
+        <!-- Welcome bar -->
+        <div class="welcome-bar">
+            <div class="welcome-text">
+                <h2>Good day, <span id="welcomeName">Doctor</span> 👋</h2>
+                <p id="todayDate">Loading date...</p>
+            </div>
+            <a href="new-prescription.html" class="new-rx-btn">
+                <i class="fas fa-plus"></i> New Prescription
+            </a>
         </div>
 
-        <div class="mb-4">
-            <input type="text" id="searchInput" placeholder="Search by patient name or phone..." class="w-full p-2 border rounded">
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-icon teal"><i class="fas fa-file-medical"></i></div>
+                <div>
+                    <div class="stat-num" id="statTotal">—</div>
+                    <div class="stat-lbl">Total Prescriptions</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon blue"><i class="fas fa-calendar-day"></i></div>
+                <div>
+                    <div class="stat-num" id="statToday">—</div>
+                    <div class="stat-lbl">Today's Prescriptions</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon amber"><i class="fas fa-users"></i></div>
+                <div>
+                    <div class="stat-num" id="statPatients">—</div>
+                    <div class="stat-lbl">Unique Patients</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon purple"><i class="fas fa-calendar-week"></i></div>
+                <div>
+                    <div class="stat-num" id="statWeek">—</div>
+                    <div class="stat-lbl">This Week</div>
+                </div>
+            </div>
         </div>
 
-        <div class="bg-white rounded shadow overflow-hidden">
-            <table class="min-w-full">
-                <thead class="bg-gray-100">
-                    <tr><th class="p-3 text-left">Date</th><th class="p-3 text-left">Patient</th><th class="p-3 text-left">Phone</th><th class="p-3 text-left">Action</th></tr>
+        <!-- Prescriptions table -->
+        <div class="content-area">
+            <div class="content-header">
+                <div>
+                    <h3>Prescriptions</h3>
+                    <p>All your saved prescriptions — searchable and shareable</p>
+                </div>
+                <div class="search-wrap">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search patient name or phone...">
+                </div>
+            </div>
+
+            <table id="rxTable">
+                <thead>
+                    <tr>
+                        <th>Patient</th>
+                        <th>Phone</th>
+                        <th>Date</th>
+                        <th>Action</th>
+                    </tr>
                 </thead>
-                <tbody id="prescriptionsTable"></tbody>
+                <tbody id="rxBody">
+                    <tr class="loading-row">
+                        <td colspan="4"><i class="fas fa-spinner fa-pulse"></i> Loading prescriptions...</td>
+                    </tr>
+                </tbody>
             </table>
+
+            <div class="empty-state" id="emptyState">
+                <i class="fas fa-file-medical-alt"></i>
+                <h4>No prescriptions yet</h4>
+                <p>You haven't created any prescriptions.<br>Click the button below to write your first one.</p>
+                <a href="new-prescription.html">+ New Prescription</a>
+            </div>
         </div>
-        <div id="emptyState" class="text-center py-8 text-gray-500 hidden">No prescriptions yet. Create your first one.</div>
+
     </main>
 
     <script>
-        let allPrescriptions = [];
+        let allRx = [];
+        const today = new Date().toISOString().split('T')[0];
 
-        async function loadPrescriptions() {
-            const user = auth.currentUser;
-            if (!user) return (window.location.href = "index.html");
-            const snapshot = await db.collection("prescriptions").where("doctorId", "==", user.uid).orderBy("date", "desc").get();
-            allPrescriptions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            renderTable();
+        // Date display
+        document.getElementById('todayDate').textContent = new Date().toLocaleDateString('en-GB', {
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+        });
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+        }
+
+        function getInitials(name) {
+            if (!name) return '?';
+            const parts = name.trim().split(' ');
+            return parts.length >= 2 ? (parts[0][0] + parts[1][0]).toUpperCase() : parts[0].slice(0,2).toUpperCase();
         }
 
         function renderTable() {
             const term = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = allPrescriptions.filter(p => p.patientName.toLowerCase().includes(term) || (p.patientPhone && p.patientPhone.includes(term)));
-            const tbody = document.getElementById('prescriptionsTable');
+            const filtered = allRx.filter(p =>
+                (p.patientName || '').toLowerCase().includes(term) ||
+                (p.patientPhone || '').includes(term)
+            );
+
+            const tbody = document.getElementById('rxBody');
             const empty = document.getElementById('emptyState');
-            if (filtered.length === 0) { tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
-            empty.classList.add('hidden');
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '';
+                empty.style.display = 'flex';
+                return;
+            }
+            empty.style.display = 'none';
+
             tbody.innerHTML = filtered.map(p => `
-                <tr class="border-t">
-                    <td class="p-3">${p.date}</td>
-                    <td class="p-3 font-medium">${escapeHtml(p.patientName)}</td>
-                    <td class="p-3">${escapeHtml(p.patientPhone || '—')}</td>
-                    <td class="p-3"><button class="text-indigo-600 view-btn" data-id="${p.id}">View</button></td>
+                <tr>
+                    <td>
+                        <div class="patient-cell">
+                            <div class="patient-ava">${getInitials(p.patientName)}</div>
+                            <div>
+                                <div class="patient-name">${escapeHtml(p.patientName)}</div>
+                                ${p.patientAge ? `<div class="patient-phone">${escapeHtml(p.patientAge)}</div>` : ''}
+                            </div>
+                        </div>
+                    </td>
+                    <td class="date-badge">${escapeHtml(p.patientPhone) || '<span style="color:#c0c8d4">—</span>'}</td>
+                    <td class="date-badge">${p.date || '—'}</td>
+                    <td>
+                        <button class="view-btn" data-id="${p.id}">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                    </td>
                 </tr>
             `).join('');
-            document.querySelectorAll('.view-btn').forEach(btn => btn.addEventListener('click', () => window.location.href = `view.html?id=${btn.dataset.id}`));
+
+            document.querySelectorAll('.view-btn').forEach(btn =>
+                btn.addEventListener('click', () => window.location.href = `view.html?id=${btn.dataset.id}`)
+            );
         }
 
-        function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;' }[m])); }
+        function computeStats(data) {
+            const todayDate = new Date().toISOString().split('T')[0];
+            const weekAgo = new Date(Date.now() - 7*24*60*60*1000).toISOString().split('T')[0];
+
+            const todayCount = data.filter(p => p.date === todayDate).length;
+            const weekCount = data.filter(p => p.date >= weekAgo).length;
+            const uniquePatients = new Set(data.map(p => p.patientPhone || p.patientName)).size;
+
+            document.getElementById('statTotal').textContent = data.length;
+            document.getElementById('statToday').textContent = todayCount;
+            document.getElementById('statPatients').textContent = uniquePatients;
+            document.getElementById('statWeek').textContent = weekCount;
+        }
+
+        async function loadDashboard(user) {
+            try {
+                const snapshot = await db.collection('prescriptions')
+                    .where('doctorId', '==', user.uid)
+                    .orderBy('createdAt', 'desc')
+                    .get();
+                allRx = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                computeStats(allRx);
+                renderTable();
+            } catch (err) {
+                document.getElementById('rxBody').innerHTML =
+                    `<tr class="loading-row"><td colspan="4" style="color:#dc2626"><i class="fas fa-exclamation-circle"></i> Error loading: ${escapeHtml(err.message)}</td></tr>`;
+            }
+        }
 
         auth.onAuthStateChanged(async user => {
-            if (!user) window.location.href = "index.html";
-            else {
-                const doc = await db.collection("doctors").doc(user.uid).get();
-                const name = doc.exists ? doc.data().name : user.email;
-                document.getElementById('doctorName').innerHTML = `<i class="fas fa-user-md"></i> ${escapeHtml(name)}`;
-                loadPrescriptions();
-            }
+            if (!user) { window.location.href = 'index.html'; return; }
+            const docSnap = await db.collection('doctors').doc(user.uid).get();
+            const name = docSnap.exists ? (docSnap.data().name || user.email) : user.email;
+            const firstName = name.split(' ')[0].replace('Dr.', '').trim();
+            document.getElementById('navDoctorName').textContent = 'Dr. ' + firstName;
+            document.getElementById('welcomeName').textContent = 'Dr. ' + firstName;
+            document.getElementById('navAvatar').textContent = getInitials(name);
+            loadDashboard(user);
         });
 
-        document.getElementById('logoutBtn').addEventListener('click', async () => { await auth.signOut(); window.location.href = "index.html"; });
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await auth.signOut();
+            window.location.href = 'index.html';
+        });
+
         document.getElementById('searchInput').addEventListener('input', renderTable);
     </script>
 </body>

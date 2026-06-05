@@ -3,50 +3,856 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CurePd Rx - Sign Up</title>
+    <title>CurePd Rx — Doctor Sign Up</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="js/firebase-init.js"></script>
+    <style>
+        :root {
+            --navy: #0d1b2a;
+            --navy-mid: #162032;
+            --teal: #0fa99e;
+            --teal-light: #13c4b8;
+            --gold: #e8c97d;
+            --text-main: #1a2332;
+            --text-muted: #6b7a8d;
+            --border: #e0e6ef;
+            --bg: #f4f7fb;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            display: flex;
+            align-items: stretch;
+        }
+
+        /* ── LEFT PANEL ── */
+        .left-panel {
+            width: 42%;
+            background: var(--navy);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 48px 52px;
+            overflow: hidden;
+        }
+
+        .left-panel::before {
+            content: '';
+            position: absolute;
+            top: -120px; right: -120px;
+            width: 380px; height: 380px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(15,169,158,0.18) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .left-panel::after {
+            content: '';
+            position: absolute;
+            bottom: -80px; left: -80px;
+            width: 280px; height: 280px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(232,201,125,0.10) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        /* Decorative grid lines */
+        .grid-lines {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 48px 48px;
+            pointer-events: none;
+        }
+
+        .brand {
+            position: relative;
+            z-index: 1;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 56px;
+        }
+
+        .brand-icon {
+            width: 44px; height: 44px;
+            background: var(--teal);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: white;
+        }
+
+        .brand-name {
+            font-family: 'DM Serif Display', serif;
+            font-size: 22px;
+            color: white;
+            letter-spacing: 0.5px;
+        }
+
+        .brand-name span {
+            color: var(--teal-light);
+        }
+
+        .hero-text {
+            margin-bottom: 48px;
+        }
+
+        .hero-text h2 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 38px;
+            line-height: 1.2;
+            color: white;
+            margin-bottom: 16px;
+        }
+
+        .hero-text h2 em {
+            color: var(--teal-light);
+            font-style: italic;
+        }
+
+        .hero-text p {
+            font-size: 15px;
+            color: rgba(255,255,255,0.55);
+            line-height: 1.7;
+            font-weight: 300;
+        }
+
+        .feature-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+
+        .feature-dot {
+            width: 32px; height: 32px;
+            flex-shrink: 0;
+            background: rgba(15,169,158,0.15);
+            border: 1px solid rgba(15,169,158,0.3);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            color: var(--teal-light);
+            margin-top: 1px;
+        }
+
+        .feature-text strong {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.85);
+            margin-bottom: 2px;
+        }
+
+        .feature-text span {
+            font-size: 12px;
+            color: rgba(255,255,255,0.38);
+            font-weight: 300;
+        }
+
+        .left-footer {
+            font-size: 11px;
+            color: rgba(255,255,255,0.2);
+            font-weight: 300;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── RIGHT PANEL ── */
+        .right-panel {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 32px;
+        }
+
+        .form-card {
+            width: 100%;
+            max-width: 440px;
+        }
+
+        .form-card h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 30px;
+            color: var(--text-main);
+            margin-bottom: 6px;
+        }
+
+        .form-card .subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+        }
+
+        /* Step indicator */
+        .steps {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            margin-bottom: 32px;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .step-num {
+            width: 26px; height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+            background: var(--border);
+            color: var(--text-muted);
+            transition: all 0.3s;
+        }
+
+        .step.active .step-num {
+            background: var(--teal);
+            color: white;
+        }
+
+        .step.done .step-num {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .step-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .step.active .step-label {
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .step-line {
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+            margin: 0 10px;
+        }
+
+        /* Section label */
+        .section-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--teal);
+            margin-bottom: 14px;
+            margin-top: 24px;
+        }
+
+        .section-label:first-of-type { margin-top: 0; }
+
+        /* Field */
+        .field {
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .field label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 6px;
+        }
+
+        .field label .req {
+            color: #ef4444;
+            margin-left: 2px;
+        }
+
+        .field .input-wrap {
+            position: relative;
+        }
+
+        .field .input-wrap i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 13px;
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .field input, .field select {
+            width: 100%;
+            height: 46px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 0 14px 0 40px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            color: var(--text-main);
+            background: white;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+            appearance: none;
+        }
+
+        .field input:focus, .field select:focus {
+            border-color: var(--teal);
+            box-shadow: 0 0 0 3px rgba(15,169,158,0.12);
+        }
+
+        .field input.error {
+            border-color: #ef4444;
+        }
+
+        .field .toggle-pw {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 13px;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .field-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        /* Optional badge */
+        .optional {
+            font-size: 10px;
+            font-weight: 400;
+            color: var(--text-muted);
+            margin-left: 4px;
+        }
+
+        /* Terms */
+        .terms {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .terms input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            margin-top: 2px;
+            accent-color: var(--teal);
+            flex-shrink: 0;
+        }
+
+        .terms label {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .terms label a {
+            color: var(--teal);
+            text-decoration: none;
+        }
+
+        /* Submit button */
+        .submit-btn {
+            width: 100%;
+            height: 50px;
+            background: var(--teal);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+            box-shadow: 0 4px 16px rgba(15,169,158,0.25);
+            letter-spacing: 0.3px;
+        }
+
+        .submit-btn:hover {
+            background: var(--teal-light);
+            box-shadow: 0 6px 20px rgba(15,169,158,0.35);
+            transform: translateY(-1px);
+        }
+
+        .submit-btn:active { transform: translateY(0); }
+
+        .submit-btn:disabled {
+            opacity: 0.65;
+            pointer-events: none;
+        }
+
+        /* Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .divider span {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Google btn */
+        .google-btn {
+            width: 100%;
+            height: 46px;
+            background: white;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .google-btn:hover {
+            border-color: #c4c4c4;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .google-btn img {
+            width: 18px; height: 18px;
+        }
+
+        /* Login link */
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .login-link a {
+            color: var(--teal);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        /* Error message */
+        .err-msg {
+            display: none;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 13px;
+            color: #dc2626;
+            margin-bottom: 16px;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .err-msg.show { display: flex; }
+
+        /* Success */
+        .success-msg {
+            display: none;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 13px;
+            color: #16a34a;
+            margin-bottom: 16px;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .success-msg.show { display: flex; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .left-panel { display: none; }
+            .right-panel { padding: 32px 20px; align-items: flex-start; padding-top: 48px; }
+        }
+    </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
-    <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
-        <h2 class="text-2xl font-bold text-center mb-6">Doctor Sign Up</h2>
-        <form id="signupForm">
-            <input type="text" id="name" placeholder="Full Name" class="w-full mb-3 p-2 border rounded" required>
-            <input type="email" id="email" placeholder="Email" class="w-full mb-3 p-2 border rounded" required>
-            <input type="password" id="password" placeholder="Password" class="w-full mb-3 p-2 border rounded" required>
-            <input type="text" id="clinic" placeholder="Clinic Name (optional)" class="w-full mb-3 p-2 border rounded">
-            <button type="submit" class="w-full bg-indigo-600 text-white p-2 rounded">Sign Up</button>
-        </form>
-        <p class="text-center mt-4">Already have an account? <a href="index.html">Login</a></p>
+<body>
+
+    <!-- LEFT PANEL -->
+    <div class="left-panel">
+        <div class="grid-lines"></div>
+
+        <div class="brand" style="position:relative;z-index:1;">
+            <div class="brand-logo">
+                <div class="brand-icon">
+                    <i class="fas fa-prescription-bottle-alt"></i>
+                </div>
+                <div class="brand-name">CurePd <span>Rx</span></div>
+            </div>
+
+            <div class="hero-text">
+                <h2>Bangladesh's<br><em>Digital</em> Prescription<br>Platform</h2>
+                <p>Stop writing by hand. Start prescribing with clarity, speed, and confidence — from any device.</p>
+            </div>
+
+            <div class="feature-list">
+                <div class="feature-item">
+                    <div class="feature-dot"><i class="fas fa-qrcode"></i></div>
+                    <div class="feature-text">
+                        <strong>QR Code Sharing</strong>
+                        <span>Patient scans, sees prescription instantly. No paper lost.</span>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-dot"><i class="fas fa-robot"></i></div>
+                    <div class="feature-text">
+                        <strong>AI Medicine Validator</strong>
+                        <span>Warns before saving if a medicine name is incorrect.</span>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-dot"><i class="fas fa-history"></i></div>
+                    <div class="feature-text">
+                        <strong>Patient History</strong>
+                        <span>Every visit saved. Track patients across time effortlessly.</span>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-dot"><i class="fas fa-print"></i></div>
+                    <div class="feature-text">
+                        <strong>Print & PDF</strong>
+                        <span>Professional letterhead printout. Download instantly.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="left-footer" style="position:relative;z-index:1;">
+            © 2025 CurePd Rx · Dhaka, Bangladesh · Built for Bangladeshi Doctors
+        </div>
     </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="right-panel">
+        <div class="form-card">
+
+            <h1>Create Account</h1>
+            <p class="subtitle">Join CurePd Rx and digitize your practice today.</p>
+
+            <!-- Steps -->
+            <div class="steps">
+                <div class="step active" id="step1">
+                    <div class="step-num">1</div>
+                    <div class="step-label">Account</div>
+                </div>
+                <div class="step-line"></div>
+                <div class="step" id="step2">
+                    <div class="step-num">2</div>
+                    <div class="step-label">Profile</div>
+                </div>
+                <div class="step-line"></div>
+                <div class="step" id="step3">
+                    <div class="step-num">3</div>
+                    <div class="step-label">Done</div>
+                </div>
+            </div>
+
+            <!-- Error / Success -->
+            <div class="err-msg" id="errMsg">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="errText">Something went wrong.</span>
+            </div>
+            <div class="success-msg" id="successMsg">
+                <i class="fas fa-check-circle"></i>
+                <span id="successText">Account created successfully!</span>
+            </div>
+
+            <form id="signupForm" novalidate>
+
+                <!-- SECTION 1: Login Credentials -->
+                <div class="section-label">Login Credentials</div>
+
+                <div class="field">
+                    <label>Email Address <span class="req">*</span></label>
+                    <div class="input-wrap">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="email" placeholder="doctor@clinic.com" autocomplete="email" required>
+                    </div>
+                </div>
+
+                <div class="field-row">
+                    <div class="field">
+                        <label>Password <span class="req">*</span></label>
+                        <div class="input-wrap">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="password" placeholder="Min. 6 characters" autocomplete="new-password" required>
+                            <i class="fas fa-eye toggle-pw" id="togglePw"></i>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>Confirm Password <span class="req">*</span></label>
+                        <div class="input-wrap">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="confirmPassword" placeholder="Repeat password" autocomplete="new-password" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 2: Doctor Profile -->
+                <div class="section-label" style="margin-top: 20px;">Doctor Information</div>
+
+                <div class="field">
+                    <label>Full Name <span class="req">*</span></label>
+                    <div class="input-wrap">
+                        <i class="fas fa-user-md"></i>
+                        <input type="text" id="name" placeholder="Dr. Rahim Uddin" autocomplete="name" required>
+                    </div>
+                </div>
+
+                <div class="field-row">
+                    <div class="field">
+                        <label>BMDC Reg. No. <span class="optional">(optional)</span></label>
+                        <div class="input-wrap">
+                            <i class="fas fa-id-card"></i>
+                            <input type="text" id="registration" placeholder="A-12345">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>Speciality <span class="optional">(optional)</span></label>
+                        <div class="input-wrap">
+                            <i class="fas fa-stethoscope"></i>
+                            <input type="text" id="speciality" placeholder="General Physician">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label>Clinic / Hospital Name <span class="optional">(optional)</span></label>
+                    <div class="input-wrap">
+                        <i class="fas fa-clinic-medical"></i>
+                        <input type="text" id="clinic" placeholder="Dhaka Medical Center, Mirpur">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label>Phone Number <span class="optional">(optional)</span></label>
+                    <div class="input-wrap">
+                        <i class="fas fa-phone"></i>
+                        <input type="tel" id="phone" placeholder="017XXXXXXXX">
+                    </div>
+                </div>
+
+                <!-- Terms -->
+                <div class="terms">
+                    <input type="checkbox" id="termsCheck">
+                    <label for="termsCheck">
+                        I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>. Patient data will be stored securely.
+                    </label>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <i class="fas fa-user-plus"></i>
+                    Create My Doctor Account
+                </button>
+
+            </form>
+
+            <div class="divider"><span>or sign up faster with</span></div>
+
+            <button class="google-btn" id="googleBtn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                Continue with Google
+            </button>
+
+            <div class="login-link">
+                Already have an account? <a href="index.html">Sign in →</a>
+            </div>
+
+        </div>
+    </div>
+
     <script>
+        // ── Toggle password visibility
+        const pwInput = document.getElementById('password');
+        document.getElementById('togglePw').addEventListener('click', () => {
+            const isText = pwInput.type === 'text';
+            pwInput.type = isText ? 'password' : 'text';
+            document.getElementById('togglePw').className = `fas fa-${isText ? 'eye' : 'eye-slash'} toggle-pw`;
+        });
+
+        // ── Helpers
+        function showError(msg) {
+            const el = document.getElementById('errMsg');
+            document.getElementById('errText').textContent = msg;
+            el.classList.add('show');
+            document.getElementById('successMsg').classList.remove('show');
+        }
+
+        function showSuccess(msg) {
+            const el = document.getElementById('successMsg');
+            document.getElementById('successText').textContent = msg;
+            el.classList.add('show');
+            document.getElementById('errMsg').classList.remove('show');
+        }
+
+        function setLoading(on) {
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = on;
+            btn.innerHTML = on
+                ? '<i class="fas fa-spinner fa-pulse"></i> Creating account...'
+                : '<i class="fas fa-user-plus"></i> Create My Doctor Account';
+        }
+
+        function setStep(n) {
+            for (let i = 1; i <= 3; i++) {
+                const s = document.getElementById(`step${i}`);
+                s.classList.remove('active', 'done');
+                if (i < n) s.classList.add('done');
+                if (i === n) s.classList.add('active');
+            }
+        }
+
+        // ── Form submit
         document.getElementById('signupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const name = document.getElementById('name').value;
-            const clinic = document.getElementById('clinic').value;
+
+            const email       = document.getElementById('email').value.trim();
+            const password    = document.getElementById('password').value;
+            const confirm     = document.getElementById('confirmPassword').value;
+            const name        = document.getElementById('name').value.trim();
+            const registration = document.getElementById('registration').value.trim();
+            const speciality  = document.getElementById('speciality').value.trim();
+            const clinic      = document.getElementById('clinic').value.trim();
+            const phone       = document.getElementById('phone').value.trim();
+            const terms       = document.getElementById('termsCheck').checked;
+
+            // Validate
+            if (!email || !password || !name) {
+                showError('Please fill in all required fields (marked with *).');
+                return;
+            }
+            if (password.length < 6) {
+                showError('Password must be at least 6 characters long.');
+                return;
+            }
+            if (password !== confirm) {
+                showError('Passwords do not match. Please re-enter.');
+                return;
+            }
+            if (!terms) {
+                showError('Please agree to the Terms of Service to continue.');
+                return;
+            }
+
+            setStep(2);
+            setLoading(true);
+
             try {
                 const userCredential = await auth.createUserWithEmailAndPassword(email, password);
                 const user = userCredential.user;
+
                 await db.collection('doctors').doc(user.uid).set({
-                    name: name,
-                    email: email,
-                    clinic: clinic,
-                    createdAt: new Date()
+                    name,
+                    email,
+                    registration: registration || '',
+                    speciality: speciality || '',
+                    clinic: clinic || '',
+                    phone: phone || '',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
-                alert("Account created! Please login.");
-                window.location.href = "index.html";
+
+                setStep(3);
+                showSuccess('Account created! Redirecting to login...');
+                setTimeout(() => { window.location.href = 'index.html'; }, 1800);
+
             } catch (error) {
+                setStep(1);
+                setLoading(false);
                 if (error.code === 'auth/email-already-in-use') {
-                    alert("This email is already registered. Please login instead.");
+                    showError('This email is already registered. Please login instead.');
+                } else if (error.code === 'auth/invalid-email') {
+                    showError('Invalid email address. Please check and try again.');
                 } else {
-                    alert("Signup failed: " + error.message);
+                    showError('Sign up failed: ' + error.message);
                 }
+            }
+        });
+
+        // ── Google Sign-Up
+        document.getElementById('googleBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('googleBtn');
+            btn.disabled = true;
+            btn.textContent = 'Connecting...';
+            try {
+                const result = await auth.signInWithPopup(googleProvider);
+                const user = result.user;
+
+                // Only set Firestore doc if new user
+                const docSnap = await db.collection('doctors').doc(user.uid).get();
+                if (!docSnap.exists) {
+                    await db.collection('doctors').doc(user.uid).set({
+                        name: user.displayName || '',
+                        email: user.email,
+                        registration: '',
+                        speciality: '',
+                        clinic: '',
+                        phone: '',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+                window.location.href = 'dashboard.html';
+            } catch (error) {
+                if (error.code !== 'auth/cancelled-popup-request') {
+                    showError('Google sign-in failed: ' + error.message);
+                }
+                btn.disabled = false;
+                btn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:18px;height:18px;"> Continue with Google';
             }
         });
     </script>
