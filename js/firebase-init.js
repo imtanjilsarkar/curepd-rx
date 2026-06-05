@@ -1,7 +1,4 @@
-// This file now uses the global Firebase objects from CDN
-// No imports needed – Firebase will be available via the `firebase` global
-
-// Your Firebase config
+// Firebase configuration (same as yours)
 const firebaseConfig = {
   apiKey: "AIzaSyAupee5VRVJIGhvW95HnDSumB-f_k7kWzU",
   authDomain: "curepad-rx.firebaseapp.com",
@@ -11,15 +8,13 @@ const firebaseConfig = {
   appId: "1:986173283901:web:1cd6c97c0d3908a5825454"
 };
 
-// Initialize Firebase
+// Initialize Firebase (using the global firebase object from CDN)
 firebase.initializeApp(firebaseConfig);
 
-// Export services (for use in other scripts)
-const auth = firebase.auth();
-const db = firebase.firestore();
-const googleProvider = new firebase.auth.GoogleAuthProvider();
+// Create global references for convenience
+window.auth = firebase.auth();
+window.db = firebase.firestore();
+window.googleProvider = new firebase.auth.GoogleAuthProvider();
 
-// Make them globally available
-window.auth = auth;
-window.db = db;
-window.googleProvider = googleProvider;
+// Optional: disable the infamous "pending credential" popup annoyance
+window.googleProvider.setCustomParameters({ prompt: 'select_account' });
