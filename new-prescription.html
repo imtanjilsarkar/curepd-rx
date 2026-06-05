@@ -6,163 +6,285 @@
     <title>CurePd Rx - New Prescription</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700&display=swap" rel="stylesheet">
     <!-- html2pdf library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Firebase CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-init.js"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: 'Inter', sans-serif; background: #f0f2f5; }
         .prescription-card {
             background: white;
-            border-radius: 1rem;
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1);
             padding: 2rem;
+            transition: all 0.2s;
         }
+        .medicine-row:hover { background-color: #fafafa; }
         @media print {
-            body * {
-                visibility: hidden;
-            }
-            #prescriptionPrintArea, #prescriptionPrintArea * {
-                visibility: visible;
-            }
-            #prescriptionPrintArea {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                margin: 0;
-                padding: 20px;
-            }
-            .no-print {
-                display: none;
-            }
+            body * { visibility: hidden; }
+            #prescriptionPrintArea, #prescriptionPrintArea * { visibility: visible; }
+            #prescriptionPrintArea { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 20px; }
+            .no-print { display: none; }
         }
+        .loading-btn { opacity: 0.7; pointer-events: none; }
     </style>
 </head>
-<body class="bg-gray-100">
-    <div class="max-w-4xl mx-auto py-6 px-4">
-        <!-- Header with back button -->
-        <div class="flex items-center justify-between mb-6 no-print">
-            <a href="dashboard.html" class="text-indigo-600 hover:text-indigo-800"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
-            <div class="flex gap-2">
-                <button id="savePrescriptionBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"><i class="fas fa-save"></i> Save (Demo)</button>
-                <button id="generatePdfBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg"><i class="fas fa-download"></i> Download PDF</button>
+<body class="p-4">
+    <div class="max-w-5xl mx-auto">
+        <!-- Header -->
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-5 no-print">
+            <a href="dashboard.html" class="text-indigo-600 hover:text-indigo-800 bg-white px-4 py-2 rounded-lg shadow-sm">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+            <div class="flex gap-3">
+                <button id="savePrescriptionBtn" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg shadow transition flex items-center gap-2">
+                    <i class="fas fa-cloud-upload-alt"></i> Save to Cloud
+                </button>
+                <button id="generatePdfBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg shadow transition flex items-center gap-2">
+                    <i class="fas fa-file-pdf"></i> Download PDF
+                </button>
             </div>
         </div>
 
-        <!-- Prescription Form + Preview combined -->
+        <!-- Prescription Card (printable area) -->
         <div class="prescription-card" id="prescriptionPrintArea">
-            <div class="border-b border-gray-200 pb-4 mb-4 flex justify-between items-start">
+            <!-- Header with dynamic doctor info -->
+            <div class="border-b border-gray-200 pb-4 mb-4 flex justify-between items-start flex-wrap gap-3">
                 <div>
                     <h1 class="text-2xl font-bold text-indigo-700">CurePd Rx</h1>
                     <p class="text-sm text-gray-500">Digital Prescription System</p>
                 </div>
-                <div class="text-right">
-                    <p class="text-sm font-semibold">Dr. Demo User</p>
-                    <p class="text-xs text-gray-500">BMDC Reg: DEMO123</p>
-                    <p class="text-xs text-gray-500">Dhaka Medical Clinic</p>
+                <div class="text-right" id="doctorInfoArea">
+                    <p class="text-sm font-semibold text-gray-700">Dr. <span id="doctorName">Loading...</span></p>
+                    <p class="text-xs text-gray-500" id="doctorReg">BMDC: ---</p>
+                    <p class="text-xs text-gray-500" id="doctorClinic">Clinic: ---</p>
                 </div>
             </div>
 
-            <!-- Patient Info -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <!-- Patient Info (editable) -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 uppercase">Patient Name</label>
-                    <input type="text" id="patientName" class="mt-1 w-full border-b border-gray-300 focus:border-indigo-500 outline-none py-1" placeholder="e.g., Rina Begum">
+                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide">Patient Name *</label>
+                    <input type="text" id="patientName" class="mt-1 w-full border-b-2 border-gray-200 focus:border-indigo-500 outline-none py-1 bg-transparent" placeholder="Rina Begum">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 uppercase">Age</label>
-                    <input type="text" id="patientAge" class="mt-1 w-full border-b border-gray-300 focus:border-indigo-500 outline-none py-1" placeholder="45 years">
+                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide">Age</label>
+                    <input type="text" id="patientAge" class="mt-1 w-full border-b-2 border-gray-200 focus:border-indigo-500 outline-none py-1 bg-transparent" placeholder="45 years">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 uppercase">Phone (optional)</label>
-                    <input type="text" id="patientPhone" class="mt-1 w-full border-b border-gray-300 focus:border-indigo-500 outline-none py-1" placeholder="017xxxxxxxx">
+                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide">Phone</label>
+                    <input type="text" id="patientPhone" class="mt-1 w-full border-b-2 border-gray-200 focus:border-indigo-500 outline-none py-1 bg-transparent" placeholder="017xxxxxxxx">
                 </div>
             </div>
 
-            <!-- Medicines Table (dynamic) -->
+            <!-- Medicines Table with suggestions -->
             <div class="mb-6">
-                <div class="flex justify-between items-center mb-2">
-                    <label class="text-xs font-semibold text-gray-600 uppercase">Medicines</label>
-                    <button type="button" id="addMedicineBtn" class="text-xs bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded"><i class="fas fa-plus"></i> Add Medicine</button>
+                <div class="flex justify-between items-center mb-3">
+                    <label class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Medicines</label>
+                    <button type="button" id="addMedicineBtn" class="text-xs bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-3 py-1 rounded-full transition">
+                        <i class="fas fa-plus"></i> Add Medicine
+                    </button>
                 </div>
-                <table class="w-full text-sm">
-                    <thead>
-                        <tr class="border-b border-gray-200">
-                            <th class="text-left py-2">Medicine Name</th>
-                            <th class="text-left py-2">Dosage</th>
-                            <th class="text-left py-2">Duration</th>
-                            <th class="w-8"></th>
-                        </tr>
-                    </thead>
-                    <tbody id="medicinesTableBody">
-                        <tr class="medicine-row">
-                            <td><input type="text" class="w-full border-b border-gray-200 focus:border-indigo-500 outline-none py-1 medicine-name" placeholder="e.g., Napa 500mg"></td>
-                            <td><input type="text" class="w-full border-b border-gray-200 focus:border-indigo-500 outline-none py-1 medicine-dose" placeholder="1+1+1"></td>
-                            <td><input type="text" class="w-full border-b border-gray-200 focus:border-indigo-500 outline-none py-1 medicine-duration" placeholder="5 days"></td>
-                            <td><button class="text-red-400 remove-medicine"><i class="fas fa-trash-alt"></i></button></td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-50">
+                            <tr class="border-b">
+                                <th class="text-left py-2 px-1">Medicine Name</th>
+                                <th class="text-left py-2 px-1">Dosage (e.g., 1+1+1)</th>
+                                <th class="text-left py-2 px-1">Duration</th>
+                                <th class="w-8"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="medicinesTableBody">
+                            <tr class="medicine-row border-b">
+                                <td class="py-2 px-1"><input type="text" class="w-full border-b border-gray-200 focus:border-indigo-500 outline-none py-1 medicine-name" placeholder="e.g., Napa 500mg"></td>
+                                <td class="py-2 px-1"><input type="text" class="w-full border-b border-gray-200 focus:border-indigo-500 outline-none py-1 medicine-dose" placeholder="1+1+1"></td>
+                                <td class="py-2 px-1"><input type="text" class="w-full border-b border-gray-200 focus:border-indigo-500 outline-none py-1 medicine-duration" placeholder="5 days"></td>
+                                <td class="py-2 px-1 text-center"><button class="text-red-400 remove-medicine"><i class="fas fa-trash-alt"></i></button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-2 text-xs text-gray-400 flex gap-3">
+                    <span><i class="far fa-lightbulb"></i> Tip: Common doses: 1+0+1, 1+1+1, 0+0+1</span>
+                </div>
             </div>
 
             <!-- Advice -->
             <div class="mb-6">
-                <label class="block text-xs font-semibold text-gray-600 uppercase">Advice / Instructions</label>
-                <textarea id="advice" rows="2" class="mt-1 w-full border border-gray-200 rounded p-2 focus:border-indigo-500 outline-none" placeholder="Take medicines after meal, rest, etc."></textarea>
+                <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide">Advice / Instructions</label>
+                <textarea id="advice" rows="2" class="mt-1 w-full border border-gray-200 rounded-lg p-2 focus:ring-1 focus:ring-indigo-500 outline-none" placeholder="Take with food, avoid alcohol, rest..."></textarea>
             </div>
 
-            <!-- Footer / Signature -->
-            <div class="border-t border-gray-200 pt-4 text-right text-sm text-gray-500">
-                <p>Digitally generated prescription • Valid without signature</p>
-                <p class="text-xs">Date: <span id="currentDate"></span></p>
+            <!-- Footer -->
+            <div class="border-t border-gray-200 pt-4 text-right text-sm text-gray-500 flex justify-between items-center">
+                <div class="text-left">
+                    <p class="text-xs">Digitally generated prescription</p>
+                    <p class="text-xs">Valid without signature</p>
+                </div>
+                <div>
+                    <p>Date: <span id="currentDate"></span></p>
+                    <p class="text-xs" id="prescriptionIdPreview"></p>
+                </div>
             </div>
         </div>
     </div>
 
-    <script type="module">
-    import { auth, db } from './js/firebase-init.js';
-    import { collection, addDoc } from "firebase/firestore";
-    import { onAuthStateChanged } from "firebase/auth";
+    <script>
+        // ---------- Firebase & DOM Elements ----------
+        let currentUser = null;
+        let doctorData = { name: "Demo User", registration: "DEMO123", clinic: "Dhaka Medical Clinic" };
 
-    onAuthStateChanged(auth, async (user) => {
-        if (!user) {
-            alert("You must be logged in.");
-            window.location.href = "index.html";
-            return;
+        const saveBtn = document.getElementById('savePrescriptionBtn');
+        const pdfBtn = document.getElementById('generatePdfBtn');
+        const addMedicineBtn = document.getElementById('addMedicineBtn');
+        const medicinesBody = document.getElementById('medicinesTableBody');
+        const patientNameInp = document.getElementById('patientName');
+        const patientAgeInp = document.getElementById('patientAge');
+        const patientPhoneInp = document.getElementById('patientPhone');
+        const adviceInp = document.getElementById('advice');
+        const doctorNameSpan = document.getElementById('doctorName');
+        const doctorRegSpan = document.getElementById('doctorReg');
+        const doctorClinicSpan = document.getElementById('doctorClinic');
+        const prescriptionIdSpan = document.getElementById('prescriptionIdPreview');
+
+        // Set current date
+        document.getElementById('currentDate').innerText = new Date().toLocaleDateString('en-GB');
+
+        // Helper: remove medicine row
+        function attachRemoveEvent(btn) {
+            btn.addEventListener('click', () => btn.closest('.medicine-row').remove());
+        }
+        document.querySelectorAll('.remove-medicine').forEach(btn => attachRemoveEvent(btn));
+
+        // Add new medicine row
+        addMedicineBtn.addEventListener('click', () => {
+            const newRow = document.createElement('tr');
+            newRow.className = 'medicine-row border-b';
+            newRow.innerHTML = `
+                <td class="py-2 px-1"><input type="text" class="w-full border-b border-gray-200 focus:border-indigo-500 outline-none py-1 medicine-name" placeholder="e.g., Omeprazole 20mg"></td>
+                <td class="py-2 px-1"><input type="text" class="w-full border-b border-gray-200 focus:border-indigo-500 outline-none py-1 medicine-dose" placeholder="1+0+1"></td>
+                <td class="py-2 px-1"><input type="text" class="w-full border-b border-gray-200 focus:border-indigo-500 outline-none py-1 medicine-duration" placeholder="7 days"></td>
+                <td class="py-2 px-1 text-center"><button class="text-red-400 remove-medicine"><i class="fas fa-trash-alt"></i></button></td>
+            `;
+            medicinesBody.appendChild(newRow);
+            attachRemoveEvent(newRow.querySelector('.remove-medicine'));
+        });
+
+        // Load doctor profile from Firestore
+        async function loadDoctorProfile(user) {
+            if (!user) return;
+            const docRef = db.collection('doctors').doc(user.uid);
+            const docSnap = await docRef.get();
+            if (docSnap.exists) {
+                const data = docSnap.data();
+                doctorData = {
+                    name: data.name || user.email.split('@')[0],
+                    registration: data.registration || 'BMDC Reg Number',
+                    clinic: data.clinic || 'Your Clinic'
+                };
+            } else {
+                doctorData = {
+                    name: user.email.split('@')[0],
+                    registration: 'Not set',
+                    clinic: 'Not set'
+                };
+            }
+            doctorNameSpan.innerText = doctorData.name;
+            doctorRegSpan.innerText = `BMDC: ${doctorData.registration}`;
+            doctorClinicSpan.innerText = doctorData.clinic;
         }
 
-        document.getElementById('savePrescriptionBtn').addEventListener('click', async () => {
-            const patientName = document.getElementById('patientName').value.trim();
-            if (!patientName) {
-                alert("Enter patient name");
+        // Save prescription to Firestore
+        async function savePrescription() {
+            if (!currentUser) {
+                alert('Please login again.');
+                window.location.href = 'index.html';
                 return;
             }
+            const patientName = patientNameInp.value.trim();
+            if (!patientName) {
+                alert('Patient name is required.');
+                patientNameInp.focus();
+                return;
+            }
+
             const medicines = [];
             document.querySelectorAll('.medicine-row').forEach(row => {
-                const name = row.querySelector('.medicine-name').value;
-                const dose = row.querySelector('.medicine-dose').value;
-                const duration = row.querySelector('.medicine-duration').value;
-                if (name) medicines.push({ name, dose, duration });
+                const name = row.querySelector('.medicine-name').value.trim();
+                if (name) {
+                    medicines.push({
+                        name: name,
+                        dose: row.querySelector('.medicine-dose').value.trim(),
+                        duration: row.querySelector('.medicine-duration').value.trim()
+                    });
+                }
             });
-            const prescription = {
-                doctorId: user.uid,
-                patientName,
-                patientAge: document.getElementById('patientAge').value,
-                patientPhone: document.getElementById('patientPhone').value,
-                advice: document.getElementById('advice').value,
-                medicines,
-                date: new Date().toISOString().split('T')[0],
-                createdAt: new Date()
-            };
-            try {
-                await addDoc(collection(db, "prescriptions"), prescription);
-                alert("Prescription saved to cloud!");
-                window.location.href = "dashboard.html";
-            } catch (error) {
-                alert("Error: " + error.message);
+            if (medicines.length === 0) {
+                alert('Please add at least one medicine.');
+                return;
             }
+
+            const prescription = {
+                doctorId: currentUser.uid,
+                patientName: patientName,
+                patientAge: patientAgeInp.value.trim(),
+                patientPhone: patientPhoneInp.value.trim(),
+                advice: adviceInp.value.trim(),
+                medicines: medicines,
+                date: new Date().toISOString().split('T')[0],
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Saving...';
+            saveBtn.classList.add('loading-btn');
+            try {
+                const docRef = await db.collection('prescriptions').add(prescription);
+                alert(`✅ Prescription saved! ID: ${docRef.id}`);
+                // Generate shareable link preview
+                const link = `${window.location.origin}/view.html?id=${docRef.id}`;
+                prescriptionIdSpan.innerHTML = `Share: <a href="${link}" target="_blank" class="text-indigo-600 underline">${docRef.id}</a>`;
+                // Optionally redirect after 1.5 seconds
+                setTimeout(() => { window.location.href = 'dashboard.html'; }, 1500);
+            } catch (err) {
+                alert('❌ Error: ' + err.message);
+                saveBtn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Save to Cloud';
+                saveBtn.classList.remove('loading-btn');
+            }
+        }
+
+        // PDF generation
+        function downloadPDF() {
+            const element = document.getElementById('prescriptionPrintArea');
+            const patient = patientNameInp.value.trim() || 'prescription';
+            const opt = {
+                margin: [0.5, 0.5, 0.5, 0.5],
+                filename: `CurePdRx_${patient.replace(/\s/g, '_')}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, letterRendering: true },
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+
+        // Auth state listener
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                alert('You must be logged in to create prescriptions.');
+                window.location.href = 'index.html';
+                return;
+            }
+            currentUser = user;
+            await loadDoctorProfile(user);
         });
-    });
-</script>
+
+        // Event listeners
+        saveBtn.addEventListener('click', savePrescription);
+        pdfBtn.addEventListener('click', downloadPDF);
+    </script>
 </body>
 </html>

@@ -3,211 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CurePd Rx - Doctor Dashboard</title>
+    <title>CurePd Rx - Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .prescription-row:hover { background-color: #f9fafb; cursor: pointer; }
-    </style>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-init.js"></script>
 </head>
 <body class="bg-gray-50">
-    <!-- Header -->
-    <nav class="bg-white shadow-sm border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-            <div class="flex items-center gap-2">
-                <i class="fas fa-prescription-bottle text-2xl text-indigo-600"></i>
-                <span class="font-bold text-xl text-gray-800">CurePd Rx</span>
-                <span class="text-sm text-gray-500 ml-2">Doctor Panel</span>
-            </div>
-            <div class="flex items-center gap-4">
-                <span id="doctorName" class="text-sm text-gray-600"><i class="fas fa-user-md mr-1"></i> Loading...</span>
-                <button id="logoutBtn" class="text-red-500 hover:text-red-700 text-sm"><i class="fas fa-sign-out-alt"></i> Logout</button>
-            </div>
+    <nav class="bg-white shadow-sm border-b px-4 py-3 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <i class="fas fa-prescription-bottle text-2xl text-indigo-600"></i>
+            <span class="font-bold text-xl">CurePd Rx</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <span id="doctorName" class="text-gray-600"><i class="fas fa-user-md"></i> Loading...</span>
+            <button id="logoutBtn" class="text-red-500 hover:text-red-700">Logout</button>
         </div>
     </nav>
 
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="max-w-6xl mx-auto px-4 py-8">
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold text-gray-800">My Prescriptions</h1>
-            <a href="new-prescription.html" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg flex items-center gap-2 transition">
-                <i class="fas fa-plus"></i> New Prescription
-            </a>
+            <h1 class="text-2xl font-bold">My Prescriptions</h1>
+            <a href="new-prescription.html" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">+ New Prescription</a>
         </div>
 
-        <div class="mb-6 relative">
-            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-            <input type="text" id="searchInput" placeholder="Search by patient name or phone..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+        <div class="mb-4">
+            <input type="text" id="searchInput" placeholder="Search by patient name or phone..." class="w-full p-2 border rounded">
         </div>
 
-        <div class="bg-white rounded-xl shadow overflow-hidden">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                    </tr>
+        <div class="bg-white rounded shadow overflow-hidden">
+            <table class="min-w-full">
+                <thead class="bg-gray-100">
+                    <tr><th class="p-3 text-left">Date</th><th class="p-3 text-left">Patient</th><th class="p-3 text-left">Phone</th><th class="p-3 text-left">Action</th></tr>
                 </thead>
-                <tbody id="prescriptionsTableBody" class="divide-y divide-gray-200"></tbody>
+                <tbody id="prescriptionsTable"></tbody>
             </table>
         </div>
-
-        <div id="emptyState" class="text-center py-12 hidden">
-            <i class="fas fa-notes-medical text-5xl text-gray-300 mb-3"></i>
-            <p class="text-gray-500">No prescriptions yet. Click "New Prescription" to create your first one.</p>
-        </div>
+        <div id="emptyState" class="text-center py-8 text-gray-500 hidden">No prescriptions yet. Create your first one.</div>
     </main>
 
-    <script type="module">
-        import { auth, db } from './js/firebase-init.js';
-        import { onAuthStateChanged, signOut } from "firebase/auth";
-        import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
-        import { doc, getDoc } from "firebase/firestore";
-
-        // Wait for auth state
-        onAuthStateChanged(auth, async (user) => {
-            if (!user) {
-                window.location.href = "index.html";
-                return;
-            }
-
-            // Display doctor name from Firestore
-            const userDoc = await getDoc(doc(db, "doctors", user.uid));
-            if (userDoc.exists()) {
-                const doctorData = userDoc.data();
-                document.getElementById('doctorName').innerHTML = `<i class="fas fa-user-md mr-1"></i> ${doctorData.name || doctorData.email}`;
-            } else {
-                document.getElementById('doctorName').innerHTML = `<i class="fas fa-user-md mr-1"></i> ${user.email}`;
-            }
-
-            // Load prescriptions
-            const tbody = document.getElementById('prescriptionsTableBody');
-            const emptyState = document.getElementById('emptyState');
-            const q = query(
-                collection(db, "prescriptions"),
-                where("doctorId", "==", user.uid),
-                orderBy("date", "desc")
-            );
-            const snapshot = await getDocs(q);
-            const prescriptions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-            if (prescriptions.length === 0) {
-                tbody.innerHTML = '';
-                emptyState.classList.remove('hidden');
-                return;
-            }
-            emptyState.classList.add('hidden');
-            tbody.innerHTML = prescriptions.map(p => `
-                <tr class="prescription-row">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${p.date}</td>
-                    <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-800">${escapeHtml(p.patientName)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${escapeHtml(p.patientPhone || '—')}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm">
-                        <button class="text-indigo-600 hover:text-indigo-800 view-btn" data-id="${p.id}"><i class="fas fa-eye"></i> View</button>
-                    </td>
-                </tr>
-            `).join('');
-
-            // Attach view button events
-            document.querySelectorAll('.view-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    window.location.href = `view.html?id=${btn.dataset.id}`;
-                });
-            });
-        });
-
-        // Search functionality (client-side filtering)
-        const searchInput = document.getElementById('searchInput');
+    <script>
         let allPrescriptions = [];
 
-        // We'll need to store prescriptions globally for search
-        // Simpler: re-fetch on search? But for efficiency, we'll store after load.
-        // Modify: after fetching, store in variable and render with filter.
-        // I'll rewrite the load part to support search.
-        // Let's do a cleaner approach: fetch once, then filter.
-
-        let currentPrescriptions = [];
-
-        async function loadAndRender() {
+        async function loadPrescriptions() {
             const user = auth.currentUser;
-            if (!user) return;
-            const q = query(
-                collection(db, "prescriptions"),
-                where("doctorId", "==", user.uid),
-                orderBy("date", "desc")
-            );
-            const snapshot = await getDocs(q);
-            currentPrescriptions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            filterAndRender();
+            if (!user) return (window.location.href = "index.html");
+            const snapshot = await db.collection("prescriptions").where("doctorId", "==", user.uid).orderBy("date", "desc").get();
+            allPrescriptions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderTable();
         }
 
-        function filterAndRender() {
-            const searchTerm = searchInput?.value.toLowerCase() || '';
-            const filtered = currentPrescriptions.filter(p => 
-                p.patientName.toLowerCase().includes(searchTerm) || 
-                (p.patientPhone && p.patientPhone.includes(searchTerm))
-            );
-            const tbody = document.getElementById('prescriptionsTableBody');
-            const emptyState = document.getElementById('emptyState');
-            if (filtered.length === 0) {
-                tbody.innerHTML = '';
-                emptyState.classList.remove('hidden');
-                return;
-            }
-            emptyState.classList.add('hidden');
+        function renderTable() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allPrescriptions.filter(p => p.patientName.toLowerCase().includes(term) || (p.patientPhone && p.patientPhone.includes(term)));
+            const tbody = document.getElementById('prescriptionsTable');
+            const empty = document.getElementById('emptyState');
+            if (filtered.length === 0) { tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
+            empty.classList.add('hidden');
             tbody.innerHTML = filtered.map(p => `
-                <tr class="prescription-row">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${p.date}</td>
-                    <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-800">${escapeHtml(p.patientName)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${escapeHtml(p.patientPhone || '—')}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm">
-                        <button class="text-indigo-600 hover:text-indigo-800 view-btn" data-id="${p.id}"><i class="fas fa-eye"></i> View</button>
-                    </td>
+                <tr class="border-t">
+                    <td class="p-3">${p.date}</td>
+                    <td class="p-3 font-medium">${escapeHtml(p.patientName)}</td>
+                    <td class="p-3">${escapeHtml(p.patientPhone || '—')}</td>
+                    <td class="p-3"><button class="text-indigo-600 view-btn" data-id="${p.id}">View</button></td>
                 </tr>
             `).join('');
-            document.querySelectorAll('.view-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    window.location.href = `view.html?id=${btn.dataset.id}`;
-                });
-            });
+            document.querySelectorAll('.view-btn').forEach(btn => btn.addEventListener('click', () => window.location.href = `view.html?id=${btn.dataset.id}`));
         }
 
-        function escapeHtml(str) {
-            if (!str) return '';
-            return str.replace(/[&<>]/g, function(m) {
-                if (m === '&') return '&amp;';
-                if (m === '<') return '&lt;';
-                if (m === '>') return '&gt;';
-                return m;
-            });
-        }
+        function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;' }[m])); }
 
-        // Re-run load when auth state ready
-        onAuthStateChanged(auth, async (user) => {
-            if (!user) return;
-            // Also display name
-            const userDoc = await getDoc(doc(db, "doctors", user.uid));
-            if (userDoc.exists()) {
-                document.getElementById('doctorName').innerHTML = `<i class="fas fa-user-md mr-1"></i> ${userDoc.data().name || userDoc.data().email}`;
-            } else {
-                document.getElementById('doctorName').innerHTML = `<i class="fas fa-user-md mr-1"></i> ${user.email}`;
+        auth.onAuthStateChanged(async user => {
+            if (!user) window.location.href = "index.html";
+            else {
+                const doc = await db.collection("doctors").doc(user.uid).get();
+                const name = doc.exists ? doc.data().name : user.email;
+                document.getElementById('doctorName').innerHTML = `<i class="fas fa-user-md"></i> ${escapeHtml(name)}`;
+                loadPrescriptions();
             }
-            await loadAndRender();
         });
 
-        if (searchInput) {
-            searchInput.addEventListener('input', filterAndRender);
-        }
-
-        // Logout
-        document.getElementById('logoutBtn')?.addEventListener('click', async () => {
-            await signOut(auth);
-            window.location.href = "index.html";
-        });
+        document.getElementById('logoutBtn').addEventListener('click', async () => { await auth.signOut(); window.location.href = "index.html"; });
+        document.getElementById('searchInput').addEventListener('input', renderTable);
     </script>
 </body>
 </html>
