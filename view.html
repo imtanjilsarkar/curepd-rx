@@ -13,646 +13,550 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="js/firebase-init.js"></script>
+    <script src="js/medical-data.js"></script>
     <style>
-        :root {
-            --navy: #0d1b2a; --teal: #0fa99e; --teal-light: #13c4b8;
-            --text-main: #1a2332; --text-muted: #6b7a8d;
-            --border: #e0e6ef; --bg: #f4f7fb;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'DM Sans', sans-serif; background: var(--bg); }
+        :root{--navy:#0d1b2a;--teal:#0fa99e;--teal-light:#13c4b8;
+            --text-main:#1a2332;--text-muted:#6b7a8d;--border:#e0e6ef;--bg:#f4f7fb;}
+        *{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'DM Sans',sans-serif;background:var(--bg);}
 
-        /* NAVBAR */
-        .navbar {
-            background: var(--navy); height: 60px;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 28px; position: sticky; top: 0; z-index: 100;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.18);
-        }
-        .nav-left { display: flex; align-items: center; gap: 18px; }
-        .back-link {
-            display: flex; align-items: center; gap: 6px;
-            color: rgba(255,255,255,0.55); font-size: 13px;
-            text-decoration: none; transition: color 0.2s;
-        }
-        .back-link:hover { color: white; }
-        .nav-title {
-            font-family: 'DM Serif Display', serif;
-            font-size: 18px; color: white;
-        }
-        .nav-title span { color: var(--teal-light); }
-        .nav-actions { display: flex; align-items: center; gap: 10px; }
-        .btn-outline {
-            height: 36px; padding: 0 16px; border-radius: 9px;
-            border: 1.5px solid rgba(255,255,255,0.2);
-            background: transparent; color: rgba(255,255,255,0.75);
-            font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
-            cursor: pointer; display: flex; align-items: center; gap: 6px;
-            transition: all 0.2s; text-decoration: none;
-        }
-        .btn-outline:hover { background: rgba(255,255,255,0.08); color: white; }
-        .btn-teal {
-            height: 36px; padding: 0 18px; border-radius: 9px;
-            background: var(--teal); color: white; border: none;
-            font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
-            cursor: pointer; display: flex; align-items: center; gap: 6px;
-            box-shadow: 0 2px 10px rgba(15,169,158,0.35);
-        }
-        .btn-share {
-            height: 36px; padding: 0 16px; border-radius: 9px;
-            background: rgba(15,169,158,0.15); color: var(--teal-light);
-            border: 1px solid rgba(15,169,158,0.3);
-            font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
-            cursor: pointer; display: flex; align-items: center; gap: 6px;
-            transition: all 0.2s;
-        }
-        .btn-share:hover { background: rgba(15,169,158,0.25); }
+        .navbar{background:var(--navy);height:60px;display:flex;align-items:center;
+            justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:100;
+            box-shadow:0 2px 12px rgba(0,0,0,.18);}
+        .nav-left{display:flex;align-items:center;gap:18px;}
+        .back-link{display:flex;align-items:center;gap:6px;color:rgba(255,255,255,.5);
+            font-size:13px;text-decoration:none;transition:color .2s;}
+        .back-link:hover{color:white;}
+        .nav-title{font-family:'DM Serif Display',serif;font-size:18px;color:white;}
+        .nav-title span{color:var(--teal-light);}
+        .nav-actions{display:flex;align-items:center;gap:10px;}
+        .btn-nav{height:36px;padding:0 16px;border-radius:9px;font-family:'DM Sans',sans-serif;
+            font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s;}
+        .btn-nav.outline{border:1.5px solid rgba(255,255,255,.2);background:transparent;
+            color:rgba(255,255,255,.75);font-weight:500;}
+        .btn-nav.outline:hover{background:rgba(255,255,255,.08);color:white;}
+        .btn-nav.share{background:rgba(15,169,158,.15);color:var(--teal-light);
+            border:1px solid rgba(15,169,158,.3);font-weight:500;}
+        .btn-nav.share:hover{background:rgba(15,169,158,.25);}
 
-        /* LAYOUT */
-        .page-wrap {
-            max-width: 960px; margin: 0 auto;
-            padding: 28px 20px;
-            display: grid; grid-template-columns: 1fr 280px;
-            gap: 20px; align-items: start;
-        }
+        .wrap{max-width:960px;margin:0 auto;padding:26px 18px;
+            display:grid;grid-template-columns:1fr 280px;gap:18px;align-items:start;}
 
-        /* ═══ PRESCRIPTION PAPER ═══ */
-        .rx-paper {
-            background: white; border-radius: 16px;
-            border: 1px solid var(--border);
-            overflow: hidden;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.06);
-        }
+        /* ── PRESCRIPTION PAPER ── */
+        .rx-paper{background:white;border-radius:16px;border:1px solid var(--border);
+            overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.06);}
+        .rx-stripe{height:5px;background:linear-gradient(90deg,var(--teal),var(--teal-light));}
+        .rx-body{padding:30px 34px;}
 
-        /* Top accent stripe */
-        .rx-stripe {
-            height: 5px;
-            background: linear-gradient(90deg, var(--teal) 0%, var(--teal-light) 100%);
-        }
+        .rx-hd{display:flex;justify-content:space-between;align-items:flex-start;
+            padding-bottom:18px;margin-bottom:22px;border-bottom:1.5px solid var(--border);}
+        .rx-brand{font-family:'DM Serif Display',serif;font-size:26px;color:var(--teal);}
+        .rx-brand-sub{font-size:11px;color:var(--text-muted);margin-top:4px;}
+        .rx-dr-name{font-size:15px;font-weight:600;color:var(--text-main);text-align:right;}
+        .rx-dr-detail{font-size:12px;color:var(--text-muted);line-height:1.7;text-align:right;}
 
-        .rx-body { padding: 32px 36px; }
+        .rx-patient{background:#f8fafc;border:1px solid var(--border);border-radius:10px;
+            padding:14px 18px;display:grid;grid-template-columns:repeat(4,1fr);
+            gap:12px;margin-bottom:22px;}
+        .rpf-lbl{font-size:10px;font-weight:600;text-transform:uppercase;
+            letter-spacing:.5px;color:var(--text-muted);margin-bottom:3px;}
+        .rpf-val{font-size:14px;font-weight:500;color:var(--text-main);}
 
-        /* Header */
-        .rx-header {
-            display: flex; justify-content: space-between; align-items: flex-start;
-            padding-bottom: 20px; margin-bottom: 24px;
-            border-bottom: 1.5px solid var(--border);
-        }
-        .rx-brand-name {
-            font-family: 'DM Serif Display', serif;
-            font-size: 26px; color: var(--teal); line-height: 1;
-        }
-        .rx-brand-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
-        .rx-doctor-block { text-align: right; }
-        .rx-dr-name {
-            font-size: 15px; font-weight: 600; color: var(--text-main);
-        }
-        .rx-dr-detail { font-size: 12px; color: var(--text-muted); line-height: 1.7; }
+        .rx-sec-title{font-size:11px;font-weight:600;text-transform:uppercase;
+            letter-spacing:.8px;color:var(--teal);margin-bottom:10px;
+            display:flex;align-items:center;gap:7px;}
+        .rx-sec-title::after{content:'';flex:1;height:1px;background:rgba(15,169,158,.2);}
 
-        /* Patient info band */
-        .rx-patient-band {
-            background: #f8fafc; border: 1px solid var(--border);
-            border-radius: 10px; padding: 14px 18px;
-            display: grid; grid-template-columns: repeat(4, 1fr);
-            gap: 12px; margin-bottom: 24px;
-        }
-        .rx-pfield-label {
-            font-size: 10px; font-weight: 600; text-transform: uppercase;
-            letter-spacing: 0.6px; color: var(--text-muted); margin-bottom: 3px;
-        }
-        .rx-pfield-val { font-size: 14px; font-weight: 500; color: var(--text-main); }
+        .rx-clinical{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px;}
+        .rx-cbox{background:var(--bg);border-radius:9px;padding:13px 16px;}
+        .rx-clbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;
+            color:var(--text-muted);margin-bottom:5px;}
+        .rx-cval{font-size:13px;color:var(--text-main);line-height:1.5;}
 
-        /* Section title */
-        .rx-section-title {
-            font-size: 11px; font-weight: 600; text-transform: uppercase;
-            letter-spacing: 0.8px; color: var(--teal); margin-bottom: 10px;
-            display: flex; align-items: center; gap: 7px;
-        }
-        .rx-section-title::after {
-            content: ''; flex: 1; height: 1px; background: rgba(15,169,158,0.2);
-        }
+        /* Medicine rows on prescription */
+        .rx-med-table{width:100%;border-collapse:collapse;margin-bottom:22px;}
+        .rx-med-table th{padding:9px 12px;text-align:left;font-size:10px;font-weight:600;
+            text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);
+            background:var(--bg);border-bottom:1px solid var(--border);}
+        .rx-med-table td{padding:11px 12px;font-size:13px;color:var(--text-main);
+            border-bottom:1px solid #f0f3f8;vertical-align:top;}
+        .rx-med-table tr:last-child td{border-bottom:none;}
+        .med-num{width:22px;height:22px;border-radius:50%;
+            background:rgba(15,169,158,.1);color:var(--teal);
+            display:inline-flex;align-items:center;justify-content:center;
+            font-size:11px;font-weight:700;margin-right:5px;}
+        .dose-badge{background:var(--navy);color:var(--teal-light);font-size:11px;
+            font-weight:600;padding:2px 8px;border-radius:5px;font-family:monospace;}
+        .inst-badge{background:#f0fdf4;color:#065f46;font-size:11px;
+            padding:2px 8px;border-radius:5px;border:1px solid #bbf7d0;}
 
-        /* Complaint / diagnosis */
-        .rx-clinical-row {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
-            margin-bottom: 24px;
-        }
-        .rx-clinical-box {
-            background: var(--bg); border-radius: 9px;
-            padding: 13px 16px;
-        }
-        .rx-clinical-label {
-            font-size: 10px; font-weight: 600; text-transform: uppercase;
-            letter-spacing: 0.6px; color: var(--text-muted); margin-bottom: 5px;
-        }
-        .rx-clinical-val { font-size: 13px; color: var(--text-main); line-height: 1.5; }
+        .rx-tests{background:var(--bg);border-radius:9px;padding:13px 16px;margin-bottom:18px;}
+        .test-tag{display:inline-block;background:white;border:1px solid var(--border);
+            border-radius:6px;padding:3px 10px;font-size:12px;margin:3px 4px 3px 0;}
 
-        /* Medicines table */
-        .rx-med-table {
-            width: 100%; border-collapse: collapse; margin-bottom: 24px;
-        }
-        .rx-med-table th {
-            padding: 9px 12px; text-align: left;
-            font-size: 10px; font-weight: 600; text-transform: uppercase;
-            letter-spacing: 0.7px; color: var(--text-muted);
-            background: var(--bg); border-bottom: 1px solid var(--border);
-        }
-        .rx-med-table td {
-            padding: 11px 12px; font-size: 13px; color: var(--text-main);
-            border-bottom: 1px solid #f0f3f8; vertical-align: top;
-        }
-        .rx-med-table tr:last-child td { border-bottom: none; }
-        .med-num {
-            width: 22px; height: 22px; border-radius: 50%;
-            background: rgba(15,169,158,0.1); color: var(--teal);
-            display: inline-flex; align-items: center; justify-content: center;
-            font-size: 11px; font-weight: 700; margin-right: 6px;
-        }
+        .rx-advice{background:#fffbeb;border:1px solid #fde68a;border-radius:9px;
+            padding:13px 16px;margin-bottom:18px;}
+        .rx-advice-txt{font-size:13px;color:#92400e;line-height:1.6;}
 
-        /* Dose badge */
-        .dose-badge {
-            display: inline-block; background: var(--navy);
-            color: var(--teal-light); font-size: 11px; font-weight: 600;
-            padding: 2px 8px; border-radius: 5px; font-family: monospace;
-        }
+        .rx-followup{display:inline-flex;align-items:center;gap:8px;
+            background:rgba(15,169,158,.06);border:1px solid rgba(15,169,158,.2);
+            border-radius:8px;padding:8px 14px;font-size:13px;color:var(--teal);margin-bottom:22px;}
 
-        /* Lab tests */
-        .rx-tests {
-            background: var(--bg); border-radius: 9px; padding: 13px 16px;
-            margin-bottom: 20px;
-        }
-        .test-tag {
-            display: inline-block; background: white;
-            border: 1px solid var(--border); border-radius: 6px;
-            padding: 3px 10px; font-size: 12px; color: var(--text-main);
-            margin: 3px 4px 3px 0;
-        }
+        .rx-footer{border-top:1px solid var(--border);padding-top:16px;
+            display:flex;justify-content:space-between;align-items:flex-end;}
+        .rx-footer-left{font-size:11px;color:var(--text-muted);}
+        .rx-id{font-family:monospace;font-size:11px;background:var(--bg);
+            padding:3px 8px;border-radius:5px;color:var(--text-muted);display:inline-block;margin-top:4px;}
 
-        /* Advice */
-        .rx-advice {
-            background: #fffbeb; border: 1px solid #fde68a;
-            border-radius: 9px; padding: 13px 16px; margin-bottom: 20px;
-        }
-        .rx-advice-text { font-size: 13px; color: #92400e; line-height: 1.6; }
+        /* ── PATIENT AI ANALYSIS ── */
+        .ai-analysis{background:white;border-radius:14px;border:1px solid var(--border);
+            margin-top:14px;overflow:hidden;}
+        .ai-analysis-hd{background:linear-gradient(135deg,#0d1b2a,#162032);
+            padding:14px 20px;display:flex;align-items:center;gap:10px;}
+        .ai-analysis-hd i{color:var(--teal-light);font-size:16px;}
+        .ai-analysis-hd h3{font-size:14px;font-weight:600;color:white;}
+        .ai-analysis-hd p{font-size:11px;color:rgba(255,255,255,.45);}
+        .ai-analysis-bd{padding:18px 20px;}
 
-        /* Follow-up */
-        .rx-followup {
-            display: inline-flex; align-items: center; gap: 8px;
-            background: rgba(15,169,158,0.06); border: 1px solid rgba(15,169,158,0.2);
-            border-radius: 8px; padding: 8px 14px;
-            font-size: 13px; color: var(--teal); margin-bottom: 24px;
-        }
+        /* Medicine explanation cards */
+        .med-explain{margin-bottom:10px;border:1px solid var(--border);border-radius:10px;
+            overflow:hidden;}
+        .med-explain:last-child{margin-bottom:0;}
+        .me-header{padding:11px 16px;background:var(--bg);display:flex;
+            align-items:center;justify-content:space-between;cursor:pointer;
+            transition:background .2s;}
+        .me-header:hover{background:#edf2f7;}
+        .me-name{font-size:13px;font-weight:600;color:var(--text-main);}
+        .me-generic{font-size:11px;color:var(--text-muted);}
+        .me-toggle{color:var(--teal);font-size:13px;transition:transform .2s;}
+        .me-body{display:none;padding:14px 16px;border-top:1px solid var(--border);}
+        .me-body.open{display:block;}
+        .me-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;}
+        .me-row:last-child{margin-bottom:0;}
+        .me-ico{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;
+            justify-content:center;font-size:12px;flex-shrink:0;}
+        .me-ico.blue{background:rgba(59,130,246,.1);color:#3b82f6;}
+        .me-ico.green{background:#d1fae5;color:#065f46;}
+        .me-ico.amber{background:#fef3c7;color:#92400e;}
+        .me-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);}
+        .me-txt{font-size:13px;color:var(--text-main);margin-top:2px;line-height:1.5;}
 
-        /* Footer */
-        .rx-footer {
-            border-top: 1px solid var(--border); padding-top: 16px;
-            display: flex; justify-content: space-between; align-items: flex-end;
-        }
-        .rx-footer-left { font-size: 11px; color: var(--text-muted); }
-        .rx-id {
-            font-family: monospace; font-size: 11px;
-            background: var(--bg); padding: 3px 8px; border-radius: 5px;
-            color: var(--text-muted); display: inline-block; margin-top: 4px;
-        }
+        /* AI full analysis */
+        #aiFullAnalysis{font-size:13px;color:var(--text-muted);line-height:1.75;
+            background:var(--bg);border-radius:9px;padding:14px;margin-top:12px;}
+        .ai-load-btn{width:100%;margin-top:12px;padding:10px;
+            background:var(--teal);color:white;border:none;border-radius:9px;
+            font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;
+            cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .2s;}
+        .ai-load-btn:hover{background:var(--teal-light);}
+        .ai-load-btn:disabled{opacity:.6;pointer-events:none;}
 
-        /* ═══ SIDEBAR ═══ */
-        .sidebar { display: flex; flex-direction: column; gap: 16px; }
+        /* ── SIDEBAR ── */
+        .sidebar{display:flex;flex-direction:column;gap:14px;}
+        .qr-card{background:white;border-radius:14px;border:1px solid var(--border);
+            padding:18px;text-align:center;}
+        .qr-lbl{font-size:11px;font-weight:600;text-transform:uppercase;
+            letter-spacing:.7px;color:var(--text-muted);margin-bottom:12px;}
+        #qrcode{display:flex;justify-content:center;margin-bottom:10px;}
+        .qr-link{font-size:11px;color:var(--text-muted);word-break:break-all;
+            background:var(--bg);padding:7px 10px;border-radius:7px;
+            margin-bottom:10px;display:block;text-align:left;}
+        .copy-btn{width:100%;height:36px;border-radius:9px;
+            background:rgba(15,169,158,.08);color:var(--teal);
+            border:1.5px solid rgba(15,169,158,.2);font-family:'DM Sans',sans-serif;
+            font-size:13px;font-weight:600;cursor:pointer;
+            display:flex;align-items:center;justify-content:center;gap:7px;transition:all .2s;}
+        .copy-btn:hover{background:var(--teal);color:white;border-color:var(--teal);}
 
-        /* QR Card */
-        .qr-card {
-            background: white; border-radius: 14px;
-            border: 1px solid var(--border);
-            padding: 20px; text-align: center;
-        }
-        .qr-label {
-            font-size: 11px; font-weight: 600; text-transform: uppercase;
-            letter-spacing: 0.8px; color: var(--text-muted); margin-bottom: 14px;
-        }
-        #qrcode { display: flex; justify-content: center; margin-bottom: 12px; }
-        #qrcode canvas, #qrcode img { border-radius: 8px; }
-        .qr-link {
-            font-size: 11px; color: var(--text-muted); word-break: break-all;
-            background: var(--bg); padding: 8px 10px; border-radius: 7px;
-            margin-bottom: 12px; display: block; text-align: left;
-        }
-        .copy-btn {
-            width: 100%; height: 36px; border-radius: 9px;
-            background: rgba(15,169,158,0.08); color: var(--teal);
-            border: 1.5px solid rgba(15,169,158,0.2);
-            font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px;
-            transition: all 0.2s;
-        }
-        .copy-btn:hover { background: var(--teal); color: white; border-color: var(--teal); }
+        .info-card{background:white;border-radius:12px;border:1px solid var(--border);padding:16px;}
+        .info-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;
+            color:var(--text-muted);margin-bottom:10px;}
+        .info-row{display:flex;justify-content:space-between;align-items:center;
+            padding:8px 0;border-bottom:1px solid #f0f3f8;}
+        .info-row:last-child{border-bottom:none;}
+        .ir-label{font-size:12px;color:var(--text-muted);}
+        .ir-val{font-size:12px;font-weight:500;color:var(--text-main);}
+        .badge-g{background:#d1fae5;color:#065f46;font-size:10px;font-weight:600;
+            padding:2px 8px;border-radius:5px;}
 
-        /* Status card */
-        .status-card {
-            background: white; border-radius: 14px;
-            border: 1px solid var(--border); padding: 18px;
-        }
-        .status-row {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 8px 0; border-bottom: 1px solid #f0f3f8;
-        }
-        .status-row:last-child { border-bottom: none; }
-        .status-label { font-size: 12px; color: var(--text-muted); }
-        .status-val { font-size: 12px; font-weight: 500; color: var(--text-main); }
-        .status-badge {
-            font-size: 10px; padding: 2px 8px; border-radius: 5px; font-weight: 600;
-        }
-        .badge-green { background: #d1fae5; color: #065f46; }
+        .act-card{background:white;border-radius:12px;border:1px solid var(--border);padding:14px;}
+        .act-item{display:flex;align-items:center;gap:10px;padding:10px 12px;
+            border-radius:9px;cursor:pointer;transition:all .2s;margin-bottom:4px;}
+        .act-item:last-child{margin-bottom:0;}
+        .act-item:hover{background:var(--bg);}
+        .act-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;
+            justify-content:center;font-size:13px;flex-shrink:0;}
+        .act-label{font-size:13px;font-weight:600;color:var(--text-main);}
+        .act-sub{font-size:11px;color:var(--text-muted);}
 
-        /* Actions card */
-        .action-item {
-            display: flex; align-items: center; gap: 12px;
-            padding: 12px 14px; border-radius: 10px;
-            cursor: pointer; transition: all 0.2s;
-            margin-bottom: 6px;
-        }
-        .action-item:last-child { margin-bottom: 0; }
-        .action-item:hover { background: var(--bg); }
-        .ai-icon {
-            width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
-            display: flex; align-items: center; justify-content: center; font-size: 14px;
-        }
-        .ai-label { font-size: 13px; font-weight: 600; color: var(--text-main); }
-        .ai-sub { font-size: 11px; color: var(--text-muted); }
-
-        /* Loading / error states */
-        .loading-state, .error-state {
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            min-height: 300px; color: var(--text-muted);
-        }
-        .loading-state i { font-size: 36px; margin-bottom: 12px; color: var(--teal); }
-        .error-state i { font-size: 48px; margin-bottom: 12px; color: #fca5a5; }
-        .error-state h3 { font-size: 16px; font-weight: 600; color: var(--text-main); margin-bottom: 6px; }
+        /* Loading/error */
+        .state-box{display:flex;flex-direction:column;align-items:center;
+            justify-content:center;min-height:300px;color:var(--text-muted);}
+        .state-box i{font-size:40px;margin-bottom:14px;}
 
         /* Toast */
-        .toast {
-            position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
-            background: var(--navy); color: white; padding: 12px 22px;
-            border-radius: 12px; font-size: 13px; font-weight: 500;
-            display: flex; align-items: center; gap: 9px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.25);
-            opacity: 0; pointer-events: none; z-index: 999; transition: opacity 0.3s;
-        }
-        .toast.show { opacity: 1; }
-        .toast i { color: #4ade80; }
+        .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+            background:var(--navy);color:white;padding:11px 22px;border-radius:12px;
+            font-size:13px;font-weight:500;display:flex;align-items:center;gap:9px;
+            box-shadow:0 8px 24px rgba(0,0,0,.25);opacity:0;pointer-events:none;z-index:999;transition:opacity .3s;}
+        .toast.show{opacity:1;}
+        .toast i{color:#4ade80;}
 
-        /* ═══ PRINT STYLES ═══ */
-        @media print {
-            .navbar, .sidebar, body > .toast { display: none !important; }
-            body { background: white; }
-            .page-wrap { display: block; padding: 0; }
-            .rx-paper { border: none; border-radius: 0; box-shadow: none; }
-            .rx-body { padding: 20px 24px; }
-            .rx-stripe { display: none; }
+        @media print{
+            .navbar,.sidebar,.toast,.ai-analysis{display:none!important;}
+            body{background:white;}
+            .wrap{display:block;padding:0;}
+            .rx-paper{border:none;border-radius:0;box-shadow:none;}
+            .rx-stripe{display:none;}
         }
-
-        @media (max-width: 768px) {
-            .page-wrap { grid-template-columns: 1fr; }
-            .rx-patient-band { grid-template-columns: repeat(2, 1fr); }
-            .rx-clinical-row { grid-template-columns: 1fr; }
+        @media(max-width:768px){
+            .wrap{grid-template-columns:1fr;}
+            .rx-patient{grid-template-columns:repeat(2,1fr);}
+            .rx-clinical{grid-template-columns:1fr;}
         }
     </style>
 </head>
 <body>
 
-<!-- NAVBAR -->
 <nav class="navbar">
     <div class="nav-left">
-        <a href="dashboard.html" class="back-link no-print">
-            <i class="fas fa-arrow-left"></i> Dashboard
-        </a>
-        <div class="nav-title">CurePd <span>Rx</span> — View Prescription</div>
+        <a href="dashboard.html" class="back-link"><i class="fas fa-arrow-left"></i> Dashboard</a>
+        <div class="nav-title">CurePd <span>Rx</span></div>
     </div>
-    <div class="nav-actions no-print">
-        <button class="btn-share" id="shareLinkBtn"><i class="fas fa-share-alt"></i> Share Link</button>
-        <button class="btn-outline" id="printBtn"><i class="fas fa-print"></i> Print</button>
-        <button class="btn-outline" id="pdfBtn"><i class="fas fa-file-pdf"></i> PDF</button>
+    <div class="nav-actions">
+        <button class="btn-nav share" id="shareLinkBtn"><i class="fas fa-share-alt"></i> Share</button>
+        <button class="btn-nav outline" id="printBtn"><i class="fas fa-print"></i> Print</button>
+        <button class="btn-nav outline" id="pdfBtn"><i class="fas fa-file-pdf"></i> PDF</button>
     </div>
 </nav>
 
-<div class="page-wrap" id="pageWrap">
-    <!-- Will be populated by JS -->
-    <div class="rx-paper">
-        <div class="loading-state">
-            <i class="fas fa-spinner fa-pulse"></i>
-            <p>Loading prescription...</p>
+<div class="wrap" id="mainWrap">
+    <div>
+        <div class="rx-paper" id="rxPaper">
+            <div class="state-box"><i class="fas fa-spinner fa-pulse" style="color:var(--teal)"></i><p>Loading prescription...</p></div>
         </div>
+        <!-- Patient AI analysis section (populated after load) -->
+        <div id="aiSection"></div>
     </div>
-    <div class="sidebar" style="display:none;" id="sidebar"></div>
+    <div class="sidebar" id="sidebar" style="display:none;"></div>
 </div>
 
-<!-- Toast -->
 <div class="toast" id="toast"><i class="fas fa-check-circle"></i><span id="toastMsg"></span></div>
 
 <script>
-    function esc(s) {
-        if (!s) return '';
-        return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    function esc(s){if(!s)return'';return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+    function fmtDate(d){if(!d)return'—';const[y,m,dy]=d.split('-');return dy?`${dy}/${m}/${y}`:d;}
+
+    function toast(msg){
+        document.getElementById('toastMsg').textContent=msg;
+        const t=document.getElementById('toast'); t.classList.add('show');
+        setTimeout(()=>t.classList.remove('show'),3000);
     }
 
-    function fmtDate(d) {
-        if (!d) return '—';
-        const [y,m,day] = d.split('-');
-        return day ? `${day}/${m}/${y}` : d;
-    }
+    // ── Render prescription paper ──
+    function renderPaper(pres, dr) {
+        const meds = pres.medicines||[];
+        const tests = pres.labTests ? pres.labTests.split(',').map(t=>t.trim()).filter(Boolean) : [];
 
-    function toast(msg) {
-        document.getElementById('toastMsg').textContent = msg;
-        const t = document.getElementById('toast');
-        t.classList.add('show');
-        setTimeout(() => t.classList.remove('show'), 3000);
-    }
+        const medRows = meds.map((m,i)=>`
+            <tr>
+                <td><span class="med-num">${i+1}</span><strong>${esc(m.name)}</strong></td>
+                <td><span class="dose-badge">${esc(m.dose)||'—'}</span></td>
+                <td>${esc(m.duration)||'—'}</td>
+                <td>${m.instructions?`<span class="inst-badge">${esc(m.instructions)}</span>`:'—'}</td>
+            </tr>`).join('');
 
-    function buildQR(url) {
-        const container = document.getElementById('qrcode');
-        if (!container) return;
-        new QRCode(container, {
-            text: url, width: 140, height: 140,
-            colorDark: '#0d1b2a', colorLight: '#ffffff',
-            correctLevel: QRCode.CorrectLevel.M
-        });
-    }
-
-    function renderPrescription(pres, dr) {
-        const rxUrl = window.location.href;
-        const meds = (pres.medicines || []);
-        const tests = pres.labTests ? pres.labTests.split(',').map(t => t.trim()).filter(Boolean) : [];
-
-        // Build prescription paper
-        const paper = document.querySelector('.rx-paper');
-        paper.innerHTML = `
+        document.getElementById('rxPaper').innerHTML = `
             <div class="rx-stripe"></div>
             <div class="rx-body">
-
-                <!-- Header -->
-                <div class="rx-header">
+                <div class="rx-hd">
                     <div>
-                        <div class="rx-brand-name">CurePd Rx</div>
+                        <div class="rx-brand">CurePd Rx</div>
                         <div class="rx-brand-sub">Digital Prescription Platform · Bangladesh</div>
                     </div>
-                    <div class="rx-doctor-block">
+                    <div>
                         <div class="rx-dr-name">Dr. ${esc(dr.name)}</div>
                         <div class="rx-dr-detail">
-                            ${dr.registration ? `BMDC Reg: ${esc(dr.registration)}<br>` : ''}
-                            ${dr.speciality ? `${esc(dr.speciality)}<br>` : ''}
-                            ${dr.clinic ? esc(dr.clinic) : ''}
+                            ${dr.registration?`BMDC: ${esc(dr.registration)}<br>`:''}
+                            ${dr.speciality?`${esc(dr.speciality)}<br>`:''}
+                            ${dr.clinic?esc(dr.clinic):''}
                         </div>
                     </div>
                 </div>
 
-                <!-- Patient band -->
-                <div class="rx-patient-band">
-                    <div>
-                        <div class="rx-pfield-label">Patient Name</div>
-                        <div class="rx-pfield-val">${esc(pres.patientName) || '—'}</div>
-                    </div>
-                    <div>
-                        <div class="rx-pfield-label">Age / Gender</div>
-                        <div class="rx-pfield-val">${esc(pres.patientAge)||'—'} ${pres.patientGender?'/ '+esc(pres.patientGender):''}</div>
-                    </div>
-                    <div>
-                        <div class="rx-pfield-label">Phone</div>
-                        <div class="rx-pfield-val">${esc(pres.patientPhone)||'—'}</div>
-                    </div>
-                    <div>
-                        <div class="rx-pfield-label">Date</div>
-                        <div class="rx-pfield-val">${fmtDate(pres.date)}</div>
-                    </div>
+                <div class="rx-patient">
+                    <div><div class="rpf-lbl">Patient</div><div class="rpf-val">${esc(pres.patientName)||'—'}</div></div>
+                    <div><div class="rpf-lbl">Age / Gender</div><div class="rpf-val">${esc(pres.patientAge)||'—'}${pres.patientGender?' / '+esc(pres.patientGender):''}</div></div>
+                    <div><div class="rpf-lbl">Phone</div><div class="rpf-val">${esc(pres.patientPhone)||'—'}</div></div>
+                    <div><div class="rpf-lbl">Date</div><div class="rpf-val">${fmtDate(pres.date)}</div></div>
                 </div>
 
-                <!-- Complaint & Diagnosis -->
-                ${(pres.complaint || pres.diagnosis) ? `
-                <div class="rx-clinical-row">
-                    ${pres.complaint ? `
-                    <div class="rx-clinical-box">
-                        <div class="rx-clinical-label">Chief Complaint</div>
-                        <div class="rx-clinical-val">${esc(pres.complaint)}</div>
-                    </div>` : '<div></div>'}
-                    ${pres.diagnosis ? `
-                    <div class="rx-clinical-box">
-                        <div class="rx-clinical-label">Diagnosis / Impression</div>
-                        <div class="rx-clinical-val">${esc(pres.diagnosis)}</div>
-                    </div>` : '<div></div>'}
-                </div>` : ''}
+                ${(pres.complaint||pres.diagnosis)?`
+                <div class="rx-clinical">
+                    ${pres.complaint?`<div class="rx-cbox"><div class="rx-clbl">Chief Complaint</div><div class="rx-cval">${esc(pres.complaint)}</div></div>`:'<div></div>'}
+                    ${pres.diagnosis?`<div class="rx-cbox"><div class="rx-clbl">Diagnosis</div><div class="rx-cval">${esc(pres.diagnosis)}</div></div>`:'<div></div>'}
+                </div>`:''}
 
-                <!-- Medicines -->
-                <div class="rx-section-title"><i class="fas fa-pills"></i> Medicines</div>
-                ${meds.length > 0 ? `
+                <div class="rx-sec-title"><i class="fas fa-pills"></i> Medicines</div>
+                ${meds.length?`
                 <table class="rx-med-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Medicine</th>
-                            <th>Dosage</th>
-                            <th>Duration</th>
-                            <th>Instructions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${meds.map((m,i) => `
-                        <tr>
-                            <td><span class="med-num">${i+1}</span></td>
-                            <td style="font-weight:600;">${esc(m.name)}</td>
-                            <td><span class="dose-badge">${esc(m.dose)||'—'}</span></td>
-                            <td>${esc(m.duration)||'—'}</td>
-                            <td style="color:var(--text-muted)">${esc(m.instructions)||'—'}</td>
-                        </tr>`).join('')}
-                    </tbody>
-                </table>` : '<p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;">No medicines prescribed.</p>'}
+                    <thead><tr><th>Medicine</th><th>Dosage</th><th>Duration</th><th>Instructions</th></tr></thead>
+                    <tbody>${medRows}</tbody>
+                </table>`:`<p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;">No medicines prescribed.</p>`}
 
-                <!-- Lab Tests -->
-                ${tests.length > 0 ? `
-                <div class="rx-section-title" style="margin-top:4px;"><i class="fas fa-flask"></i> Lab Tests</div>
+                ${tests.length?`
+                <div class="rx-sec-title"><i class="fas fa-flask"></i> Lab Tests</div>
                 <div class="rx-tests" style="margin-bottom:20px;">
-                    ${tests.map(t => `<span class="test-tag">${esc(t)}</span>`).join('')}
-                </div>` : ''}
+                    ${tests.map(t=>`<span class="test-tag">${esc(t)}</span>`).join('')}
+                </div>`:''}
 
-                <!-- Advice -->
-                ${pres.advice ? `
-                <div class="rx-section-title"><i class="fas fa-comment-medical"></i> Advice</div>
-                <div class="rx-advice">
-                    <div class="rx-advice-text"><i class="fas fa-exclamation-circle" style="margin-right:6px;"></i>${esc(pres.advice)}</div>
-                </div>` : ''}
+                ${pres.advice?`
+                <div class="rx-sec-title"><i class="fas fa-comment-medical"></i> Advice</div>
+                <div class="rx-advice"><div class="rx-advice-txt"><i class="fas fa-exclamation-circle" style="margin-right:6px;"></i>${esc(pres.advice)}</div></div>`:''}
 
-                <!-- Follow-up -->
-                ${pres.followupDate ? `
-                <div class="rx-followup">
-                    <i class="fas fa-calendar-check"></i>
-                    <span>Follow-up scheduled: <strong>${fmtDate(pres.followupDate)}</strong></span>
-                </div>` : ''}
+                ${pres.followupDate?`<div class="rx-followup"><i class="fas fa-calendar-check"></i> Follow-up: <strong>${fmtDate(pres.followupDate)}</strong></div>`:''}
 
-                <!-- Footer -->
                 <div class="rx-footer">
                     <div class="rx-footer-left">
-                        <div>Digitally generated by CurePd Rx · Valid without physical signature</div>
+                        Digitally generated by CurePd Rx · Valid without physical signature
                         <div class="rx-id">RX-ID: ${esc(pres.id)}</div>
                     </div>
                     <div style="text-align:right;">
-                        <div style="font-size:11px;color:var(--text-muted);">Verify this prescription</div>
-                        <div id="qrInPaper" style="margin-top:6px;"></div>
+                        <div style="font-size:10px;color:var(--text-muted);margin-bottom:5px;">Scan to verify</div>
+                        <div id="qrInPaper"></div>
                     </div>
                 </div>
+            </div>`;
 
-            </div>
-        `;
-
-        // QR in paper footer (small, for print)
+        // Mini QR in footer
         new QRCode(document.getElementById('qrInPaper'), {
-            text: rxUrl, width: 64, height: 64,
-            colorDark: '#0d1b2a', colorLight: '#ffffff',
-            correctLevel: QRCode.CorrectLevel.L
+            text: window.location.href, width:56, height:56,
+            colorDark:'#0d1b2a', colorLight:'#ffffff', correctLevel: QRCode.CorrectLevel.L
         });
+    }
 
-        // Build sidebar
+    // ── Build Patient AI Analysis Section ──
+    function buildPatientAnalysis(pres) {
+        const meds = pres.medicines||[];
+        if (!meds.length) return;
+
+        // Local explanations from dataset
+        const medCards = meds.map(m => {
+            const info = MedicalData.getMedicineInfo(m.name);
+            const expanded = info ? `
+                <div class="me-body" id="meb-${esc(m.name).replace(/\s/g,'_')}">
+                    <div class="me-row">
+                        <div class="me-ico blue"><i class="fas fa-info-circle"></i></div>
+                        <div><div class="me-lbl">Why this medicine?</div>
+                        <div class="me-txt">${esc(info.purpose)}</div></div>
+                    </div>
+                    <div class="me-row">
+                        <div class="me-ico green"><i class="fas fa-clock"></i></div>
+                        <div><div class="me-lbl">Best time to take</div>
+                        <div class="me-txt">${esc(info.timing)}</div></div>
+                    </div>
+                    <div class="me-row">
+                        <div class="me-ico amber"><i class="fas fa-exclamation-triangle"></i></div>
+                        <div><div class="me-lbl">Important note</div>
+                        <div class="me-txt">${esc(info.warning)}</div></div>
+                    </div>
+                </div>` :
+                `<div class="me-body" id="meb-${esc(m.name).replace(/\s/g,'_')}">
+                    <div style="font-size:13px;color:var(--text-muted);padding:4px 0;">
+                        Take as directed by your doctor. Follow the dosage and duration exactly.
+                    </div>
+                </div>`;
+
+            const key = esc(m.name).replace(/\s/g,'_');
+            return `
+                <div class="med-explain">
+                    <div class="me-header" onclick="toggleMed('${key}')">
+                        <div>
+                            <div class="me-name">${esc(m.name)}</div>
+                            <div class="me-generic">${esc(m.dose||'')} ${m.duration?'· '+esc(m.duration):''} ${m.instructions?'· '+esc(m.instructions):''}</div>
+                        </div>
+                        <i class="fas fa-chevron-down me-toggle" id="tog-${key}"></i>
+                    </div>
+                    ${expanded}
+                </div>`;
+        }).join('');
+
+        document.getElementById('aiSection').innerHTML = `
+            <div class="ai-analysis">
+                <div class="ai-analysis-hd">
+                    <i class="fas fa-robot"></i>
+                    <div>
+                        <h3>Patient Health Guide</h3>
+                        <p>Understand your medicines and health advice in simple language</p>
+                    </div>
+                </div>
+                <div class="ai-analysis-bd">
+                    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;
+                        color:var(--text-muted);margin-bottom:12px;"><i class="fas fa-pills"></i> Your Medicines Explained</div>
+                    ${medCards}
+                    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+                        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;
+                            color:var(--text-muted);margin-bottom:8px;"><i class="fas fa-robot"></i> AI Full Health Summary</div>
+                        <div id="aiFullAnalysis" style="font-size:13px;color:var(--text-muted);
+                            font-style:italic;background:var(--bg);border-radius:9px;padding:14px;">
+                            Click below to get a plain-language explanation of your health condition and treatment plan.
+                        </div>
+                        <button class="ai-load-btn" id="aiPatientBtn">
+                            <i class="fas fa-magic"></i> Explain My Prescription in Simple Language
+                        </button>
+                    </div>
+                </div>
+            </div>`;
+
+        document.getElementById('aiPatientBtn').addEventListener('click', () => loadPatientAI(pres));
+    }
+
+    function toggleMed(key) {
+        const body = document.getElementById(`meb-${key}`);
+        const tog = document.getElementById(`tog-${key}`);
+        if (!body) return;
+        body.classList.toggle('open');
+        tog.style.transform = body.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0)';
+    }
+
+    // ── AI Patient explanation (Anthropic API) ──
+    async function loadPatientAI(pres) {
+        const btn = document.getElementById('aiPatientBtn');
+        btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Generating...';
+        btn.disabled = true;
+
+        const meds = (pres.medicines||[]).map(m=>`${m.name} (${m.dose||'?'}, ${m.duration||'?'}, ${m.instructions||'as directed'})`).join('; ');
+        const prompt = `A patient in Bangladesh received this prescription. Explain it in very simple, friendly language that a non-medical person can understand.
+
+Patient diagnosis: ${pres.diagnosis||'N/A'}
+Complaint: ${pres.complaint||'N/A'}
+Medicines: ${meds||'N/A'}
+Lab tests ordered: ${pres.labTests||'None'}
+Doctor advice: ${pres.advice||'None'}
+Follow-up date: ${pres.followupDate||'N/A'}
+
+Write in 3-4 short paragraphs. Cover: (1) What health problem do they have in simple words, (2) What each medicine does briefly, (3) Important things to remember about taking the medicines, (4) When to see the doctor again or go to emergency. Be warm, clear, and encouraging. Do not use medical jargon.`;
+
+        try {
+            const res = await fetch('https://api.anthropic.com/v1/messages', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:500,
+                    messages:[{role:'user',content:prompt}]})
+            });
+            const data = await res.json();
+            const txt = data.content?.[0]?.text || 'Could not generate explanation.';
+            const el = document.getElementById('aiFullAnalysis');
+            el.style.fontStyle='normal';
+            el.style.color='var(--text-main)';
+            el.innerHTML = txt.split('\n\n').map(p=>`<p style="margin-bottom:10px;">${esc(p)}</p>`).join('');
+            btn.innerHTML = '<i class="fas fa-check-circle"></i> Generated';
+            btn.style.background = '#10b981';
+        } catch(e) {
+            document.getElementById('aiFullAnalysis').textContent = 'AI service temporarily unavailable. Please try again later.';
+            btn.innerHTML = '<i class="fas fa-magic"></i> Try Again';
+            btn.disabled = false;
+        }
+    }
+
+    // ── Build Sidebar ──
+    function buildSidebar(pres, tests) {
+        const rxUrl = window.location.href;
         const sidebar = document.getElementById('sidebar');
         sidebar.style.display = 'flex';
         sidebar.innerHTML = `
-            <!-- QR Card -->
             <div class="qr-card">
-                <div class="qr-label"><i class="fas fa-qrcode"></i> Share QR Code</div>
+                <div class="qr-lbl"><i class="fas fa-qrcode"></i> Share QR Code</div>
                 <div id="qrcode"></div>
                 <div class="qr-link">${esc(rxUrl)}</div>
-                <button class="copy-btn" id="copyLinkBtn">
-                    <i class="fas fa-copy"></i> Copy Link
-                </button>
-                <div style="font-size:11px;color:var(--text-muted);margin-top:10px;line-height:1.5;">
-                    Patient scans this QR code to view the prescription without any login.
-                </div>
+                <button class="copy-btn" id="copyBtn"><i class="fas fa-copy"></i> Copy Link</button>
+                <p style="font-size:11px;color:var(--text-muted);margin-top:10px;line-height:1.5;">
+                    Patient scans QR to view. No login needed.
+                </p>
             </div>
 
-            <!-- Status -->
-            <div class="status-card">
-                <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);margin-bottom:10px;">Prescription Info</div>
-                <div class="status-row">
-                    <span class="status-label">Status</span>
-                    <span class="status-badge badge-green">✓ Saved</span>
-                </div>
-                <div class="status-row">
-                    <span class="status-label">Date</span>
-                    <span class="status-val">${fmtDate(pres.date)}</span>
-                </div>
-                <div class="status-row">
-                    <span class="status-label">Medicines</span>
-                    <span class="status-val">${meds.length} item${meds.length!==1?'s':''}</span>
-                </div>
-                <div class="status-row">
-                    <span class="status-label">Tests</span>
-                    <span class="status-val">${tests.length > 0 ? tests.length+' ordered' : 'None'}</span>
-                </div>
-                ${pres.followupDate ? `
-                <div class="status-row">
-                    <span class="status-label">Follow-up</span>
-                    <span class="status-val">${fmtDate(pres.followupDate)}</span>
-                </div>` : ''}
+            <div class="info-card">
+                <div class="info-lbl">Prescription Details</div>
+                <div class="info-row"><span class="ir-label">Status</span><span class="badge-g">✓ Saved</span></div>
+                <div class="info-row"><span class="ir-label">Date</span><span class="ir-val">${fmtDate(pres.date)}</span></div>
+                <div class="info-row"><span class="ir-label">Medicines</span><span class="ir-val">${(pres.medicines||[]).length} items</span></div>
+                <div class="info-row"><span class="ir-label">Lab Tests</span><span class="ir-val">${tests.length>0?tests.length+' ordered':'None'}</span></div>
+                ${pres.followupDate?`<div class="info-row"><span class="ir-label">Follow-up</span><span class="ir-val">${fmtDate(pres.followupDate)}</span></div>`:''}
             </div>
 
-            <!-- Actions -->
-            <div class="status-card">
-                <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);margin-bottom:6px;">Actions</div>
-                <div class="action-item" id="act-print">
-                    <div class="ai-icon" style="background:rgba(15,169,158,0.1);color:var(--teal)"><i class="fas fa-print"></i></div>
-                    <div><div class="ai-label">Print</div><div class="ai-sub">Print this prescription</div></div>
+            <div class="act-card">
+                <div class="info-lbl">Actions</div>
+                <div class="act-item" id="actPrint">
+                    <div class="act-ico" style="background:rgba(15,169,158,.1);color:var(--teal)"><i class="fas fa-print"></i></div>
+                    <div><div class="act-label">Print</div><div class="act-sub">Print prescription</div></div>
                 </div>
-                <div class="action-item" id="act-pdf">
-                    <div class="ai-icon" style="background:#f3f4f6;color:#6b7280"><i class="fas fa-file-pdf"></i></div>
-                    <div><div class="ai-label">Download PDF</div><div class="ai-sub">Save as PDF</div></div>
+                <div class="act-item" id="actPdf">
+                    <div class="act-ico" style="background:var(--bg);color:var(--text-muted)"><i class="fas fa-file-pdf"></i></div>
+                    <div><div class="act-label">Download PDF</div><div class="act-sub">Save as PDF</div></div>
                 </div>
-                <div class="action-item" id="act-share">
-                    <div class="ai-icon" style="background:rgba(59,130,246,0.1);color:#3b82f6"><i class="fas fa-share-alt"></i></div>
-                    <div><div class="ai-label">Share Link</div><div class="ai-sub">Copy shareable URL</div></div>
+                <div class="act-item" id="actShare">
+                    <div class="act-ico" style="background:rgba(59,130,246,.1);color:#3b82f6"><i class="fas fa-share-alt"></i></div>
+                    <div><div class="act-label">Copy Share Link</div><div class="act-sub">Send to patient</div></div>
                 </div>
-            </div>
-        `;
+            </div>`;
 
-        // Build QR in sidebar
-        buildQR(rxUrl);
-
-        // Event bindings
-        document.getElementById('copyLinkBtn').addEventListener('click', () => {
-            navigator.clipboard.writeText(rxUrl).then(() => toast('✅ Link copied to clipboard!'));
+        new QRCode(document.getElementById('qrcode'), {
+            text: rxUrl, width:140, height:140,
+            colorDark:'#0d1b2a', colorLight:'#ffffff', correctLevel: QRCode.CorrectLevel.M
         });
-        document.getElementById('act-print').addEventListener('click', () => window.print());
-        document.getElementById('act-share').addEventListener('click', () => {
-            navigator.clipboard.writeText(rxUrl).then(() => toast('✅ Link copied!'));
-        });
-        document.getElementById('act-pdf').addEventListener('click', () => downloadPDF(pres, dr));
+
+        document.getElementById('copyBtn').addEventListener('click', ()=>{ navigator.clipboard.writeText(rxUrl).then(()=>toast('✅ Link copied!')); });
+        document.getElementById('actShare').addEventListener('click', ()=>{ navigator.clipboard.writeText(rxUrl).then(()=>toast('✅ Link copied!')); });
+        document.getElementById('actPrint').addEventListener('click', ()=>window.print());
+        document.getElementById('actPdf').addEventListener('click', ()=>downloadPDF(pres));
     }
 
-    function downloadPDF(pres, dr) {
-        const element = document.querySelector('.rx-paper');
-        const opt = {
-            margin: [0.4, 0.4, 0.4, 0.4],
-            filename: `CurePdRx_${(pres.patientName||'prescription').replace(/\s/g,'_')}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-        };
-        html2pdf().set(opt).from(element).save();
+    function downloadPDF(pres) {
+        const element = document.getElementById('rxPaper');
+        html2pdf().set({
+            margin:[0.4,0.4,0.4,0.4],
+            filename:`CurePdRx_${(pres.patientName||'rx').replace(/\s/g,'_')}.pdf`,
+            image:{type:'jpeg',quality:.98},html2canvas:{scale:2},
+            jsPDF:{unit:'in',format:'a4',orientation:'portrait'}
+        }).from(element).save();
     }
 
-    async function loadPrescription() {
+    // ── Load everything ──
+    async function init() {
         const id = new URLSearchParams(window.location.search).get('id');
         if (!id) {
-            document.querySelector('.rx-paper').innerHTML = `
-                <div class="error-state">
-                    <i class="fas fa-exclamation-circle" style="color:#fca5a5"></i>
-                    <h3>No Prescription ID</h3>
-                    <p style="font-size:13px;color:var(--text-muted);">Please provide a valid prescription ID in the URL.</p>
-                    <a href="dashboard.html" style="margin-top:16px;color:var(--teal);font-size:13px;">← Back to Dashboard</a>
-                </div>`;
+            document.getElementById('rxPaper').innerHTML=`<div class="state-box"><i class="fas fa-exclamation-circle" style="color:#fca5a5"></i><h3>No Prescription ID</h3><p>Please provide a valid ID in the URL.</p></div>`;
             return;
         }
-
         try {
-            const docSnap = await db.collection('prescriptions').doc(id).get();
-            if (!docSnap.exists) {
-                document.querySelector('.rx-paper').innerHTML = `
-                    <div class="error-state">
-                        <i class="fas fa-search-minus"></i>
-                        <h3>Prescription Not Found</h3>
-                        <p style="font-size:13px;color:var(--text-muted);">The ID "${esc(id)}" does not exist.</p>
-                        <a href="dashboard.html" style="margin-top:16px;color:var(--teal);font-size:13px;">← Back to Dashboard</a>
-                    </div>`;
+            const snap = await db.collection('prescriptions').doc(id).get();
+            if (!snap.exists) {
+                document.getElementById('rxPaper').innerHTML=`<div class="state-box"><i class="fas fa-search-minus"></i><p>Prescription not found.</p></div>`;
                 return;
             }
-
-            const pres = { id: docSnap.id, ...docSnap.data() };
-            let dr = { name: 'Doctor', registration: '', speciality: '', clinic: '' };
-
+            const pres = {id: snap.id, ...snap.data()};
+            let dr = {name:'Doctor',registration:'',speciality:'',clinic:''};
             if (pres.doctorId) {
                 const drSnap = await db.collection('doctors').doc(pres.doctorId).get();
                 if (drSnap.exists) dr = drSnap.data();
             }
+            const tests = pres.labTests ? pres.labTests.split(',').map(t=>t.trim()).filter(Boolean) : [];
+            renderPaper(pres, dr);
+            buildPatientAnalysis(pres);
+            buildSidebar(pres, tests);
 
-            renderPrescription(pres, dr);
-
-            // Bind navbar buttons
-            document.getElementById('printBtn').addEventListener('click', () => window.print());
-            document.getElementById('pdfBtn').addEventListener('click', () => downloadPDF(pres, dr));
-            document.getElementById('shareLinkBtn').addEventListener('click', () => {
-                navigator.clipboard.writeText(window.location.href).then(() => toast('✅ Link copied to clipboard!'));
+            // Navbar buttons
+            document.getElementById('printBtn').addEventListener('click',()=>window.print());
+            document.getElementById('pdfBtn').addEventListener('click',()=>downloadPDF(pres));
+            document.getElementById('shareLinkBtn').addEventListener('click',()=>{
+                navigator.clipboard.writeText(window.location.href).then(()=>toast('✅ Link copied!'));
             });
-
         } catch(err) {
-            document.querySelector('.rx-paper').innerHTML = `
-                <div class="error-state">
-                    <i class="fas fa-server"></i>
-                    <h3>Error Loading</h3>
-                    <p style="font-size:13px;color:var(--text-muted);">${esc(err.message)}</p>
-                </div>`;
+            document.getElementById('rxPaper').innerHTML=`<div class="state-box"><i class="fas fa-server"></i><p>Error: ${esc(err.message)}</p></div>`;
         }
     }
 
-    // Load on ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', loadPrescription);
-    } else {
-        loadPrescription();
-    }
+    if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', init);
+    else init();
 </script>
 </body>
 </html>
