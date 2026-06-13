@@ -12,51 +12,49 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="js/firebase-init.js"></script>
-    <script src="js/medical-data.js"></script>
+    <script src="js/layer0-medicines.js"></script>
+    <script src="js/layer1-diseases.js"></script>
+    <script src="js/layer2-engine.js"></script>
     <style>
-        :root {
-            --navy:#0d1b2a; --teal:#0fa99e; --teal-light:#13c4b8;
-            --text-main:#1a2332; --text-muted:#6b7a8d;
-            --border:#e0e6ef; --bg:#f4f7fb;
-        }
+        :root{--navy:#0d1b2a;--teal:#0fa99e;--teal-light:#13c4b8;
+            --text-main:#1a2332;--text-muted:#6b7a8d;--border:#e0e6ef;--bg:#f4f7fb;}
         *{box-sizing:border-box;margin:0;padding:0;}
         body{font-family:'DM Sans',sans-serif;background:var(--bg);}
 
         /* NAVBAR */
         .navbar{background:var(--navy);height:60px;display:flex;align-items:center;
-            justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:200;
-            box-shadow:0 2px 12px rgba(0,0,0,0.18);}
+            justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:300;
+            box-shadow:0 2px 12px rgba(0,0,0,.18);}
         .nav-left{display:flex;align-items:center;gap:18px;}
-        .back-link{display:flex;align-items:center;gap:6px;color:rgba(255,255,255,0.5);
+        .back-link{display:flex;align-items:center;gap:6px;color:rgba(255,255,255,.5);
             font-size:13px;text-decoration:none;transition:color .2s;}
         .back-link:hover{color:white;}
         .nav-title{font-family:'DM Serif Display',serif;font-size:18px;color:white;}
         .nav-title span{color:var(--teal-light);}
         .nav-actions{display:flex;align-items:center;gap:10px;}
-        .autosave{font-size:11px;color:rgba(255,255,255,0.3);display:flex;align-items:center;gap:5px;}
+        .autosave{font-size:11px;color:rgba(255,255,255,.3);display:flex;align-items:center;gap:5px;}
         .btn-nav{height:36px;padding:0 16px;border-radius:9px;font-family:'DM Sans',sans-serif;
-            font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s;}
-        .btn-nav.outline{border:1.5px solid rgba(255,255,255,0.2);background:transparent;color:rgba(255,255,255,0.75);}
-        .btn-nav.outline:hover{background:rgba(255,255,255,0.08);color:white;}
-        .btn-nav.primary{background:var(--teal);color:white;border:none;font-weight:600;
-            box-shadow:0 2px 10px rgba(15,169,158,0.35);}
+            font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s;}
+        .btn-nav.outline{border:1.5px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.75);font-weight:500;}
+        .btn-nav.outline:hover{background:rgba(255,255,255,.08);color:white;}
+        .btn-nav.primary{background:var(--teal);color:white;border:none;font-weight:600;box-shadow:0 2px 10px rgba(15,169,158,.35);}
         .btn-nav.primary:hover{background:var(--teal-light);}
         .btn-nav:disabled{opacity:.6;pointer-events:none;}
 
         /* LAYOUT */
-        .layout{max-width:1050px;margin:0 auto;padding:26px 18px;
-            display:grid;grid-template-columns:1fr 290px;gap:18px;align-items:start;}
+        .layout{max-width:1060px;margin:0 auto;padding:24px 18px;
+            display:grid;grid-template-columns:1fr 298px;gap:18px;align-items:start;}
 
         /* CARD */
         .card{background:white;border-radius:14px;border:1px solid var(--border);margin-bottom:14px;}
-        .card-hd{padding:14px 20px;border-bottom:1px solid var(--border);
-            display:flex;align-items:center;gap:10px;}
+        .card-hd{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
         .hd-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;
             justify-content:center;font-size:14px;flex-shrink:0;}
-        .hd-icon.teal{background:rgba(15,169,158,0.1);color:var(--teal);}
-        .hd-icon.blue{background:rgba(59,130,246,0.1);color:#3b82f6;}
-        .hd-icon.amber{background:rgba(245,158,11,0.1);color:#f59e0b;}
-        .hd-icon.purple{background:rgba(139,92,246,0.1);color:#8b5cf6;}
+        .hd-icon.teal{background:rgba(15,169,158,.1);color:var(--teal);}
+        .hd-icon.blue{background:rgba(59,130,246,.1);color:#3b82f6;}
+        .hd-icon.amber{background:rgba(245,158,11,.1);color:#f59e0b;}
+        .hd-icon.purple{background:rgba(139,92,246,.1);color:#8b5cf6;}
+        .hd-icon.red{background:rgba(239,68,68,.1);color:#ef4444;}
         .hd-text h3{font-size:14px;font-weight:600;color:var(--text-main);}
         .hd-text p{font-size:11px;color:var(--text-muted);}
         .card-bd{padding:18px 20px;}
@@ -69,31 +67,65 @@
             letter-spacing:.6px;color:var(--text-muted);margin-bottom:5px;}
         .field label .req{color:#ef4444;}
         .field input,.field select,.field textarea{
-            width:100%;border:1.5px solid var(--border);border-radius:9px;
-            padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:13px;
-            color:var(--text-main);background:white;outline:none;transition:all .2s;}
+            width:100%;border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;
+            font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text-main);
+            background:white;outline:none;transition:all .2s;}
         .field input:focus,.field select:focus,.field textarea:focus{
             border-color:var(--teal);box-shadow:0 0 0 3px rgba(15,169,158,.1);}
         .field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'%3E%3Cpath fill='%236b7a8d' d='M5 7L0 0h10z'/%3E%3C/svg%3E");
-            background-repeat:no-repeat;background-position:right 12px center;appearance:none;padding-right:32px;}
+            background-repeat:no-repeat;background-position:right 12px center;appearance:none;padding-right:30px;}
         .field textarea{resize:vertical;min-height:68px;}
 
+        /* PATIENT CONTEXT TOGGLES */
+        .context-row{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px;}
+        .ctx-toggle{display:flex;align-items:center;gap:5px;padding:5px 12px;
+            background:var(--bg);border:1.5px solid var(--border);border-radius:8px;
+            font-size:12px;font-weight:500;color:var(--text-muted);cursor:pointer;transition:all .2s;
+            user-select:none;}
+        .ctx-toggle:hover{border-color:var(--teal);color:var(--teal);}
+        .ctx-toggle.active{background:rgba(15,169,158,.1);border-color:var(--teal);color:var(--teal);}
+        .ctx-toggle i{font-size:11px;}
+
+        /* DISEASE INFO PANEL */
+        .disease-panel{display:none;background:linear-gradient(135deg,#0d1b2a,#162032);
+            border-radius:11px;padding:14px 16px;margin-bottom:14px;}
+        .disease-panel.show{display:block;}
+        .dp-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+        .dp-name{font-family:'DM Serif Display',serif;font-size:15px;color:white;}
+        .dp-icd{font-size:10px;background:rgba(15,169,158,.2);color:var(--teal-light);
+            padding:2px 8px;border-radius:5px;margin-left:6px;}
+        .dp-symptoms{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;}
+        .dp-sym{font-size:11px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.6);
+            padding:3px 9px;border-radius:5px;border:1px solid rgba(255,255,255,.08);}
+        .dp-note{font-size:12px;color:rgba(255,255,255,.45);line-height:1.6;
+            border-top:1px solid rgba(255,255,255,.08);padding-top:8px;margin-top:8px;}
+
+        /* EMERGENCY FLAGS */
+        .emergency-bar{display:none;background:#fff1f2;border:1.5px solid #fecdd3;
+            border-radius:10px;padding:11px 16px;margin-bottom:14px;align-items:flex-start;gap:10px;}
+        .emergency-bar.show{display:flex;}
+        .emergency-bar i{color:#ef4444;font-size:16px;flex-shrink:0;margin-top:1px;}
+        .emergency-bar-content strong{display:block;font-size:12px;font-weight:700;color:#be123c;margin-bottom:4px;}
+        .emergency-bar-content ul{padding-left:14px;}
+        .emergency-bar-content ul li{font-size:12px;color:#be123c;margin-bottom:2px;}
+
         /* AI SUGGESTION BANNER */
-        .ai-suggest-banner{
-            background:linear-gradient(135deg,rgba(15,169,158,.06) 0%,rgba(19,196,184,.04) 100%);
+        .ai-banner{display:none;background:linear-gradient(135deg,rgba(15,169,158,.06),rgba(19,196,184,.03));
             border:1.5px solid rgba(15,169,158,.2);border-radius:11px;
-            padding:12px 16px;margin-bottom:14px;display:none;}
-        .ai-suggest-banner.show{display:block;}
-        .ai-banner-title{font-size:11px;font-weight:600;color:var(--teal);
-            text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px;
-            display:flex;align-items:center;gap:6px;}
+            padding:13px 16px;margin-bottom:14px;}
+        .ai-banner.show{display:block;}
+        .ai-banner-title{font-size:11px;font-weight:600;color:var(--teal);text-transform:uppercase;
+            letter-spacing:.7px;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+        .ai-banner-sub{font-size:11px;color:var(--text-muted);margin-left:auto;}
         .suggest-chips{display:flex;flex-wrap:wrap;gap:6px;}
-        .suggest-chip{
-            background:white;border:1.5px solid var(--border);border-radius:7px;
+        .suggest-chip{background:white;border:1.5px solid var(--border);border-radius:8px;
             padding:5px 12px;font-size:12px;color:var(--text-main);cursor:pointer;
             display:flex;align-items:center;gap:5px;transition:all .2s;font-weight:500;}
         .suggest-chip:hover{border-color:var(--teal);background:rgba(15,169,158,.06);color:var(--teal);}
-        .suggest-chip i{font-size:11px;color:var(--teal);}
+        .suggest-chip.flagged{border-color:#f59e0b;background:#fffbeb;}
+        .suggest-chip.flagged:hover{border-color:#f59e0b;background:#fef3c7;}
+        .suggest-chip.added{opacity:.4;pointer-events:none;text-decoration:line-through;}
+        .chip-warning{font-size:9px;color:#92400e;display:block;margin-top:2px;}
 
         /* MEDICINE TABLE */
         .med-table{width:100%;border-collapse:collapse;}
@@ -103,95 +135,107 @@
         .med-row td{padding:5px 5px;border-bottom:1px solid #f0f3f8;vertical-align:top;}
         .med-row:last-child td{border-bottom:none;}
 
-        /* MED INPUT with autocomplete */
         .med-input-wrap{position:relative;}
-        .med-input{
-            width:100%;border:1.5px solid var(--border);border-radius:8px;
-            padding:8px 10px;font-family:'DM Sans',sans-serif;font-size:13px;
-            color:var(--text-main);background:white;outline:none;transition:all .2s;}
+        .med-input{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;
+            font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text-main);
+            background:white;outline:none;transition:all .2s;}
         .med-input:focus{border-color:var(--teal);box-shadow:0 0 0 2px rgba(15,169,158,.1);}
         .med-input.valid{border-color:#10b981;}
+        .med-input.danger{border-color:#ef4444;background:#fff5f5;}
 
-        /* Autocomplete dropdown */
-        .autocomplete-list{
-            position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:500;
+        /* Autocomplete */
+        .ac-list{position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:500;
             background:white;border:1.5px solid var(--teal);border-radius:10px;
-            box-shadow:0 8px 24px rgba(0,0,0,0.12);overflow:hidden;display:none;}
-        .autocomplete-list.show{display:block;}
-        .ac-item{
-            padding:9px 12px;cursor:pointer;transition:background .15s;
-            border-bottom:1px solid #f0f3f8;display:flex;align-items:center;gap:8px;}
+            box-shadow:0 8px 24px rgba(0,0,0,.12);overflow:hidden;display:none;max-height:240px;overflow-y:auto;}
+        .ac-list.show{display:block;}
+        .ac-item{padding:9px 13px;cursor:pointer;border-bottom:1px solid #f0f3f8;
+            display:flex;align-items:center;gap:8px;transition:background .15s;}
         .ac-item:last-child{border-bottom:none;}
-        .ac-item:hover{background:rgba(15,169,158,.06);}
+        .ac-item:hover{background:rgba(15,169,158,.05);}
         .ac-name{font-size:13px;font-weight:600;color:var(--text-main);}
         .ac-generic{font-size:11px;color:var(--text-muted);}
         .ac-cat{font-size:10px;background:rgba(15,169,158,.1);color:var(--teal);
-            padding:2px 7px;border-radius:5px;margin-left:auto;white-space:nowrap;}
+            padding:2px 7px;border-radius:5px;margin-left:auto;white-space:nowrap;flex-shrink:0;}
+        .ac-safe-warn{font-size:10px;color:#f59e0b;display:block;}
 
-        /* Instructions combobox select */
-        .inst-select{
-            width:100%;border:1.5px solid var(--border);border-radius:8px;
-            padding:8px 28px 8px 10px;font-family:'DM Sans',sans-serif;font-size:12px;
-            color:var(--text-main);background:white;outline:none;appearance:none;
+        /* Validation badge */
+        .val-chip{display:inline-flex;align-items:center;gap:3px;font-size:10px;
+            font-weight:600;padding:2px 7px;border-radius:5px;white-space:nowrap;}
+        .val-chip.ok{background:#d1fae5;color:#065f46;}
+        .val-chip.warn{background:#fef3c7;color:#92400e;}
+        .val-chip.danger{background:#fee2e2;color:#991b1b;}
+
+        .inst-select{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:8px 28px 8px 10px;
+            font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text-main);
+            background:white;outline:none;appearance:none;
             background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'%3E%3Cpath fill='%236b7a8d' d='M5 7L0 0h10z'/%3E%3C/svg%3E");
-            background-repeat:no-repeat;background-position:right 8px center;
-            transition:all .2s;cursor:pointer;}
+            background-repeat:no-repeat;background-position:right 8px center;transition:all .2s;cursor:pointer;}
         .inst-select:focus{border-color:var(--teal);box-shadow:0 0 0 2px rgba(15,169,158,.1);}
 
-        .remove-med{width:26px;height:26px;border:none;background:none;
-            color:#cbd5e1;cursor:pointer;border-radius:6px;
-            display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .2s;}
+        .remove-med{width:26px;height:26px;border:none;background:none;color:#cbd5e1;cursor:pointer;
+            border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .2s;}
         .remove-med:hover{background:#fee2e2;color:#ef4444;}
 
-        .add-med-btn{width:100%;margin-top:10px;padding:9px;
-            border:1.5px dashed var(--border);border-radius:9px;background:none;
-            color:var(--teal);font-family:'DM Sans',sans-serif;font-size:13px;
-            font-weight:500;cursor:pointer;display:flex;align-items:center;
+        .add-med-btn{width:100%;margin-top:10px;padding:9px;border:1.5px dashed var(--border);
+            border-radius:9px;background:none;color:var(--teal);font-family:'DM Sans',sans-serif;
+            font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;
             justify-content:center;gap:7px;transition:all .2s;}
         .add-med-btn:hover{background:rgba(15,169,158,.05);border-color:var(--teal);}
 
         /* Dose chips */
-        .dose-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
-        .dose-chip{font-size:10px;padding:3px 9px;border-radius:5px;
-            background:var(--bg);border:1px solid var(--border);
-            color:var(--text-muted);cursor:pointer;transition:all .15s;font-family:monospace;}
+        .dose-row{display:flex;align-items:center;flex-wrap:wrap;gap:5px;margin-top:9px;}
+        .dose-label{font-size:10px;color:var(--text-muted);font-weight:600;margin-right:2px;}
+        .dose-chip{font-size:10px;padding:3px 9px;border-radius:5px;background:var(--bg);
+            border:1px solid var(--border);color:var(--text-muted);cursor:pointer;
+            transition:all .15s;font-family:monospace;}
         .dose-chip:hover{background:rgba(15,169,158,.1);color:var(--teal);border-color:var(--teal);}
 
-        /* Test suggestion chips */
-        .test-suggest{margin-top:8px;display:none;}
-        .test-suggest.show{display:block;}
-        .test-suggest-label{font-size:10px;color:var(--teal);font-weight:600;margin-bottom:5px;}
-        .test-chip{
-            display:inline-flex;align-items:center;gap:4px;
+        /* Test suggestion */
+        .test-ai{display:none;margin-top:8px;}
+        .test-ai.show{display:block;}
+        .test-ai-lbl{font-size:10px;font-weight:600;color:var(--teal);text-transform:uppercase;
+            letter-spacing:.6px;margin-bottom:5px;display:flex;align-items:center;gap:5px;}
+        .test-chip{display:inline-flex;align-items:center;gap:4px;
             background:rgba(15,169,158,.07);border:1px solid rgba(15,169,158,.2);
             color:var(--teal);border-radius:6px;padding:3px 10px;
             font-size:11px;cursor:pointer;margin:2px 4px 2px 0;transition:all .15s;}
         .test-chip:hover{background:var(--teal);color:white;}
-        .test-chip i{font-size:10px;}
+        .test-chip.added{opacity:.4;pointer-events:none;}
+
+        /* Advice suggestions */
+        .advice-ai{display:none;margin-top:10px;}
+        .advice-ai.show{display:block;}
+        .advice-ai-lbl{font-size:10px;font-weight:600;color:var(--teal);text-transform:uppercase;
+            letter-spacing:.6px;margin-bottom:6px;display:flex;align-items:center;gap:5px;}
+        .advice-item{display:flex;align-items:flex-start;gap:8px;padding:7px 0;
+            border-bottom:1px solid #f0f3f8;cursor:pointer;transition:all .15s;}
+        .advice-item:last-child{border-bottom:none;}
+        .advice-item:hover .advice-text{color:var(--teal);}
+        .advice-add{width:22px;height:22px;border-radius:5px;background:rgba(15,169,158,.1);
+            color:var(--teal);display:flex;align-items:center;justify-content:center;
+            font-size:11px;flex-shrink:0;margin-top:1px;}
+        .advice-text{font-size:12px;color:var(--text-muted);line-height:1.5;}
 
         /* SIDEBAR */
         .sidebar{display:flex;flex-direction:column;gap:14px;}
         .dr-card{background:var(--navy);border-radius:14px;padding:18px 20px;color:white;}
-        .dr-card-lbl{font-size:10px;font-weight:600;text-transform:uppercase;
-            letter-spacing:1px;color:rgba(255,255,255,.35);margin-bottom:10px;}
+        .dr-card-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;
+            color:rgba(255,255,255,.35);margin-bottom:10px;}
         .dr-name{font-family:'DM Serif Display',serif;font-size:17px;color:white;margin-bottom:3px;}
         .dr-detail{font-size:12px;color:rgba(255,255,255,.45);margin-bottom:1px;}
 
-        /* AI summary */
         .ai-box{background:linear-gradient(135deg,#0d1b2a,#162032);border-radius:12px;
             padding:16px;border:1px solid rgba(15,169,158,.2);}
         .ai-box-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;
             color:var(--teal-light);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
         #aiSumText{font-size:12px;color:rgba(255,255,255,.5);line-height:1.7;min-height:48px;font-style:italic;}
-        .ai-gen-btn{margin-top:10px;width:100%;padding:8px;
-            background:rgba(15,169,158,.15);border:1px solid rgba(15,169,158,.3);
-            border-radius:8px;color:var(--teal-light);font-family:'DM Sans',sans-serif;
-            font-size:12px;font-weight:500;cursor:pointer;
+        .ai-gen-btn{margin-top:10px;width:100%;padding:8px;background:rgba(15,169,158,.15);
+            border:1px solid rgba(15,169,158,.3);border-radius:8px;color:var(--teal-light);
+            font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;
             display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s;}
         .ai-gen-btn:hover{background:rgba(15,169,158,.25);}
         .ai-gen-btn:disabled{opacity:.5;pointer-events:none;}
 
-        /* Quick actions */
         .qa-card{background:white;border-radius:12px;border:1px solid var(--border);padding:14px;}
         .qa-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;
             color:var(--text-muted);margin-bottom:10px;}
@@ -201,30 +245,25 @@
         .qa-item:hover{background:var(--bg);}
         .qa-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;
             justify-content:center;font-size:13px;flex-shrink:0;}
-        .qa-ico.g{background:#d1fae5;color:#065f46;}
-        .qa-ico.t{background:rgba(15,169,158,.1);color:var(--teal);}
-        .qa-ico.gr{background:var(--bg);color:var(--text-muted);}
         .qa-txt strong{display:block;font-size:13px;font-weight:600;color:var(--text-main);}
         .qa-txt span{font-size:11px;color:var(--text-muted);}
 
-        /* Tips */
         .tips{border-left:3px solid var(--teal);background:white;border-radius:0 12px 12px 0;
             padding:14px 16px;border-top:1px solid var(--border);border-right:1px solid var(--border);border-bottom:1px solid var(--border);}
-        .tips-lbl{font-size:10px;font-weight:600;color:var(--teal);text-transform:uppercase;
-            letter-spacing:.6px;margin-bottom:7px;}
+        .tips-lbl{font-size:10px;font-weight:600;color:var(--teal);text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px;}
         .tips p{font-size:12px;color:var(--text-muted);line-height:1.75;}
 
         /* Toast */
         .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
-            background:var(--navy);color:white;padding:11px 22px;
-            border-radius:12px;font-size:13px;font-weight:500;
-            display:flex;align-items:center;gap:9px;
-            box-shadow:0 8px 24px rgba(0,0,0,.25);
-            opacity:0;pointer-events:none;z-index:999;transition:opacity .3s;white-space:nowrap;}
+            background:var(--navy);color:white;padding:11px 22px;border-radius:12px;
+            font-size:13px;font-weight:500;display:flex;align-items:center;gap:9px;
+            box-shadow:0 8px 24px rgba(0,0,0,.25);opacity:0;pointer-events:none;z-index:999;
+            transition:opacity .3s;white-space:nowrap;}
         .toast.show{opacity:1;}
         .toast.ok i{color:#4ade80;}
         .toast.err i{color:#f87171;}
         .toast.info i{color:var(--teal-light);}
+        .toast.warn i{color:#fbbf24;}
 
         @media(max-width:768px){
             .layout{grid-template-columns:1fr;}
@@ -249,10 +288,9 @@
 </nav>
 
 <div class="layout">
-<!-- ═══ MAIN FORM ═══ -->
-<div>
+<div><!-- LEFT COLUMN -->
 
-    <!-- PATIENT INFO -->
+    <!-- ① PATIENT INFORMATION -->
     <div class="card">
         <div class="card-hd">
             <div class="hd-icon teal"><i class="fas fa-user"></i></div>
@@ -272,7 +310,7 @@
             <div class="fg fg-3">
                 <div class="field">
                     <label>Age</label>
-                    <input type="text" id="patientAge" placeholder="35 years">
+                    <input type="number" id="patientAge" placeholder="35" min="0" max="120">
                 </div>
                 <div class="field">
                     <label>Gender</label>
@@ -290,57 +328,83 @@
                     </select>
                 </div>
             </div>
+
+            <!-- Patient Context Toggles -->
+            <div style="margin-top:14px;">
+                <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;color:var(--text-muted);margin-bottom:6px;">
+                    <i class="fas fa-shield-alt" style="color:var(--teal)"></i> Patient Risk Factors
+                    <span style="font-size:10px;font-weight:400;color:var(--text-muted);text-transform:none;letter-spacing:0;"> — affects medicine suggestions</span>
+                </div>
+                <div class="context-row">
+                    <div class="ctx-toggle" data-ctx="pregnancy" id="ctx-pregnancy"><i class="fas fa-baby"></i> Pregnant</div>
+                    <div class="ctx-toggle" data-ctx="renal" id="ctx-renal"><i class="fas fa-kidneys"></i> Renal Disease</div>
+                    <div class="ctx-toggle" data-ctx="hepatic" id="ctx-hepatic"><i class="fas fa-disease"></i> Liver Disease</div>
+                    <div class="ctx-toggle" data-ctx="elderly" id="ctx-elderly"><i class="fas fa-user-clock"></i> Elderly (65+)</div>
+                    <div class="ctx-toggle" data-ctx="asthma" id="ctx-asthma"><i class="fas fa-lungs"></i> Asthma</div>
+                    <div class="ctx-toggle" data-ctx="pepticUlcer" id="ctx-pepticUlcer"><i class="fas fa-stomach"></i> Peptic Ulcer</div>
+                    <div class="ctx-toggle" data-ctx="dengue" id="ctx-dengue"><i class="fas fa-virus"></i> Dengue</div>
+                    <div class="ctx-toggle" data-ctx="ckd" id="ctx-ckd"><i class="fas fa-filter"></i> CKD</div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- DIAGNOSIS -->
+    <!-- ② DIAGNOSIS & COMPLAINT -->
     <div class="card">
         <div class="card-hd">
             <div class="hd-icon blue"><i class="fas fa-notes-medical"></i></div>
-            <div class="hd-text"><h3>Diagnosis & Complaint</h3><p>AI will suggest medicines automatically after you fill this</p></div>
+            <div class="hd-text"><h3>Diagnosis & Complaint</h3><p>AI activates after you fill this section</p></div>
         </div>
         <div class="card-bd">
             <div class="fg" style="gap:11px;">
                 <div class="field">
                     <label>Chief Complaint <span class="req">*</span></label>
-                    <input type="text" id="complaint" placeholder="e.g. Fever for 3 days, headache, body pain" autocomplete="off">
+                    <input type="text" id="complaint" placeholder="e.g. Fever for 3 days, headache, burning urination" autocomplete="off">
                 </div>
                 <div class="field">
                     <label>Diagnosis / Impression</label>
-                    <input type="text" id="diagnosis" placeholder="e.g. Viral Fever, Type 2 Diabetes, Hypertension" autocomplete="off">
+                    <input type="text" id="diagnosis" placeholder="e.g. Viral Fever, Type 2 Diabetes, Hypertension, UTI" autocomplete="off">
+                </div>
+            </div>
+            <!-- Disease knowledge panel (populated by engine) -->
+            <div class="disease-panel" id="diseasePanel"></div>
+            <!-- Emergency flags -->
+            <div class="emergency-bar" id="emergencyBar">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div class="emergency-bar-content">
+                    <strong>⚠️ Emergency Warning Signs — Refer/Admit if present:</strong>
+                    <ul id="emergencyList"></ul>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- MEDICINES -->
+    <!-- ③ MEDICINES -->
     <div class="card">
         <div class="card-hd">
             <div class="hd-icon amber"><i class="fas fa-pills"></i></div>
-            <div class="hd-text"><h3>Medicines</h3><p>Type 2+ letters for autocomplete suggestions</p></div>
+            <div class="hd-text"><h3>Medicines</h3><p>AI suggests context-aware medicines based on diagnosis + patient risk factors</p></div>
         </div>
         <div class="card-bd">
-
-            <!-- AI Medicine Suggestions Banner -->
-            <div class="ai-suggest-banner" id="aiMedBanner">
+            <!-- AI Smart Suggestions -->
+            <div class="ai-banner" id="aiBanner">
                 <div class="ai-banner-title">
-                    <i class="fas fa-robot"></i> AI Suggestions based on your diagnosis
-                    <span style="margin-left:auto;font-size:10px;color:var(--text-muted);text-transform:none;letter-spacing:0;">Tap to add →</span>
+                    <i class="fas fa-robot"></i>
+                    AI Smart Suggestions
+                    <span class="ai-banner-sub" id="aiBannerCtx"></span>
                 </div>
-                <div class="suggest-chips" id="aiMedChips"></div>
+                <div class="suggest-chips" id="aiChips"></div>
             </div>
 
             <table class="med-table">
-                <thead>
-                    <tr>
-                        <th style="width:34%;">Medicine Name</th>
-                        <th style="width:17%;">Dosage</th>
-                        <th style="width:15%;">Duration</th>
-                        <th style="width:22%;">Instructions</th>
-                        <th style="width:8%;">Status</th>
-                        <th style="width:4%;"></th>
-                    </tr>
-                </thead>
+                <thead><tr>
+                    <th style="width:32%">Medicine Name</th>
+                    <th style="width:17%">Dosage</th>
+                    <th style="width:15%">Duration</th>
+                    <th style="width:22%">Instructions</th>
+                    <th style="width:10%">Status</th>
+                    <th style="width:4%"></th>
+                </tr></thead>
                 <tbody id="medBody"></tbody>
             </table>
 
@@ -348,8 +412,8 @@
                 <i class="fas fa-plus"></i> Add Medicine Row
             </button>
 
-            <div class="dose-chips">
-                <span style="font-size:10px;color:var(--text-muted);font-weight:600;margin-right:4px;">Quick dose:</span>
+            <div class="dose-row">
+                <span class="dose-label">Quick dose:</span>
                 <span class="dose-chip" data-dose="1+0+1">1+0+1</span>
                 <span class="dose-chip" data-dose="1+1+1">1+1+1</span>
                 <span class="dose-chip" data-dose="0+0+1">0+0+1</span>
@@ -362,35 +426,38 @@
         </div>
     </div>
 
-    <!-- LAB TESTS -->
+    <!-- ④ LAB TESTS -->
     <div class="card">
         <div class="card-hd">
             <div class="hd-icon purple"><i class="fas fa-flask"></i></div>
-            <div class="hd-text"><h3>Lab Tests / Investigations</h3><p>AI suggests tests based on diagnosis</p></div>
+            <div class="hd-text"><h3>Lab Tests / Investigations</h3><p>AI recommends tests based on your diagnosis</p></div>
         </div>
         <div class="card-bd">
             <div class="field">
                 <input type="text" id="labTests" placeholder="e.g. CBC, Blood Sugar (F), Urine R/E — separate by comma">
             </div>
-            <!-- AI Test suggestions -->
-            <div class="test-suggest" id="testSuggest">
-                <div class="test-suggest-label"><i class="fas fa-robot"></i> Suggested tests for this diagnosis</div>
+            <div class="test-ai" id="testAi">
+                <div class="test-ai-lbl"><i class="fas fa-robot"></i> Recommended for this diagnosis</div>
                 <div id="testChips"></div>
             </div>
         </div>
     </div>
 
-    <!-- ADVICE & FOLLOW-UP -->
+    <!-- ⑤ ADVICE & FOLLOW-UP -->
     <div class="card">
         <div class="card-hd">
             <div class="hd-icon teal"><i class="fas fa-comment-medical"></i></div>
-            <div class="hd-text"><h3>Advice & Follow-up</h3></div>
+            <div class="hd-text"><h3>Advice & Follow-up</h3><p>AI generates evidence-based advice</p></div>
         </div>
         <div class="card-bd">
             <div class="fg" style="gap:12px;">
                 <div class="field">
                     <label>Doctor's Advice / Instructions</label>
-                    <textarea id="advice" placeholder="e.g. Take medicines with food. Drink 8 glasses of water daily. Rest for 3 days."></textarea>
+                    <textarea id="advice" placeholder="Type your advice or click suggestions below..."></textarea>
+                    <div class="advice-ai" id="adviceAi">
+                        <div class="advice-ai-lbl"><i class="fas fa-robot"></i> AI-suggested advice for this diagnosis (tap to add)</div>
+                        <div id="adviceItems"></div>
+                    </div>
                 </div>
                 <div class="field" style="max-width:200px;">
                     <label>Follow-up Date</label>
@@ -400,12 +467,11 @@
         </div>
     </div>
 
-</div>
+</div><!-- END LEFT -->
 
-<!-- ═══ SIDEBAR ═══ -->
+<!-- SIDEBAR -->
 <div class="sidebar">
 
-    <!-- Doctor card -->
     <div class="dr-card">
         <div class="dr-card-lbl">Prescribing Doctor</div>
         <div class="dr-name" id="sbDrName">Loading...</div>
@@ -416,98 +482,375 @@
             font-size:11px;color:rgba(255,255,255,.22);">Date: <span id="sbDate"></span></div>
     </div>
 
-    <!-- AI Visit Summary -->
     <div class="ai-box">
         <div class="ai-box-lbl"><i class="fas fa-robot"></i> AI Visit Summary</div>
-        <div id="aiSumText">Fill diagnosis and medicines, then generate a plain-language summary for the record.</div>
+        <div id="aiSumText">Fill diagnosis and medicines, then generate a clinical summary.</div>
         <button class="ai-gen-btn" id="aiSumBtn"><i class="fas fa-magic"></i> Generate Summary</button>
     </div>
 
-    <!-- Quick Actions -->
     <div class="qa-card">
         <div class="qa-lbl">Quick Actions</div>
         <div class="qa-item" id="qSave">
-            <div class="qa-ico g"><i class="fas fa-cloud-upload-alt"></i></div>
+            <div class="qa-ico" style="background:#d1fae5;color:#065f46;"><i class="fas fa-cloud-upload-alt"></i></div>
             <div class="qa-txt"><strong>Save to Cloud</strong><span>Permanent & shareable link</span></div>
         </div>
         <div class="qa-item" id="qPrint">
-            <div class="qa-ico t"><i class="fas fa-print"></i></div>
+            <div class="qa-ico" style="background:rgba(15,169,158,.1);color:var(--teal);"><i class="fas fa-print"></i></div>
             <div class="qa-txt"><strong>Print</strong><span>Opens print dialog</span></div>
         </div>
         <div class="qa-item" id="qPdf">
-            <div class="qa-ico gr"><i class="fas fa-file-pdf"></i></div>
+            <div class="qa-ico" style="background:var(--bg);color:var(--text-muted);"><i class="fas fa-file-pdf"></i></div>
             <div class="qa-txt"><strong>Download PDF</strong><span>Save as PDF file</span></div>
         </div>
     </div>
 
-    <!-- Tips -->
     <div class="tips">
-        <div class="tips-lbl"><i class="fas fa-lightbulb"></i> Tips</div>
+        <div class="tips-lbl"><i class="fas fa-lightbulb"></i> How AI helps</div>
         <p>
-            • Type 2+ letters in medicine name for autocomplete<br>
-            • Dosage format: <strong>1+1+1</strong> (morning+noon+night)<br>
-            • Click dose chips to fill quickly<br>
-            • AI suggests medicines after diagnosis<br>
-            • Separate tests with commas<br>
-            • QR code generated after saving
+            • Toggle <strong>Risk Factors</strong> for context-aware suggestions<br>
+            • Medicines flagged ⚠️ have cautions for this patient<br>
+            • Type 2+ letters for medicine autocomplete<br>
+            • AI excludes contraindicated medicines automatically<br>
+            • Emergency flags appear if high-risk disease detected<br>
+            • Advice suggestions are evidence-based
         </p>
     </div>
 
 </div>
 </div>
 
-<!-- Toast -->
 <div class="toast" id="toast"><i class="fas fa-check-circle"></i><span id="toastMsg"></span></div>
 
 <script>
     let currentUser = null, doctorData = {};
     let lastDoseInput = null;
+    let patientContext = {};
+    let medCount = 0;
 
     document.getElementById('sbDate').textContent = new Date().toLocaleDateString('en-GB');
 
-    // ── Toast ──
+    // ── Toast ──────────────────────────────────────────────
     function toast(msg, type='ok') {
         const t = document.getElementById('toast');
-        const ic = t.querySelector('i');
+        t.querySelector('i').className = `fas fa-${type==='ok'?'check-circle':type==='err'?'times-circle':type==='warn'?'exclamation-triangle':'info-circle'}`;
         document.getElementById('toastMsg').textContent = msg;
         t.className = `toast show ${type}`;
-        ic.className = `fas fa-${type==='ok'?'check-circle':type==='err'?'times-circle':'info-circle'}`;
-        setTimeout(() => t.classList.remove('show'), 3500);
+        setTimeout(() => t.classList.remove('show'), 3800);
     }
 
-    // ── Autosave ──
-    function autosave() {
-        try {
-            localStorage.setItem('curepd_draft', JSON.stringify(collectForm()));
-            const now = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-            document.getElementById('autoSaveLbl').innerHTML =
-                `<i class="fas fa-circle" style="font-size:7px;color:#4ade80"></i> Saved ${now}`;
-        } catch(e) {}
-    }
+    // ── Escape HTML ────────────────────────────────────────
+    function esc(s){ if(!s)return''; return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
-    function loadDraft() {
-        try {
-            const d = JSON.parse(localStorage.getItem('curepd_draft') || '{}');
-            if (d.patientName) document.getElementById('patientName').value = d.patientName;
-            if (d.patientPhone) document.getElementById('patientPhone').value = d.patientPhone;
-            if (d.patientAge) document.getElementById('patientAge').value = d.patientAge;
-            if (d.patientGender) document.getElementById('patientGender').value = d.patientGender;
-            if (d.patientBlood) document.getElementById('patientBlood').value = d.patientBlood;
-            if (d.complaint) document.getElementById('complaint').value = d.complaint;
-            if (d.diagnosis) document.getElementById('diagnosis').value = d.diagnosis;
-            if (d.labTests) document.getElementById('labTests').value = d.labTests;
-            if (d.advice) document.getElementById('advice').value = d.advice;
-            if (d.followupDate) document.getElementById('followupDate').value = d.followupDate;
-            if (d.medicines && d.medicines.length) {
-                document.getElementById('medBody').innerHTML = '';
-                d.medicines.forEach(m => addMedRow(m.name, m.dose, m.duration, m.instructions));
+    // ── Patient context toggles ────────────────────────────
+    document.querySelectorAll('.ctx-toggle').forEach(btn => {
+        btn.addEventListener('click', () => {
+            btn.classList.toggle('active');
+            const key = btn.dataset.ctx;
+            patientContext[key] = btn.classList.contains('active');
+            // Auto-set elderly if age >= 65
+            runClinicalEngine();
+        });
+    });
+
+    // Auto elderly from age
+    document.getElementById('patientAge').addEventListener('input', () => {
+        const age = parseInt(document.getElementById('patientAge').value) || 0;
+        const elderlyBtn = document.getElementById('ctx-elderly');
+        if (age >= 65) { elderlyBtn.classList.add('active'); patientContext.elderly = true; }
+        else { elderlyBtn.classList.remove('active'); patientContext.elderly = false; }
+        runClinicalEngine();
+    });
+
+    // Auto-pregnancy toggle from gender
+    document.getElementById('patientGender').addEventListener('change', () => {
+        const pregBtn = document.getElementById('ctx-pregnancy');
+        if (document.getElementById('patientGender').value !== 'Female') {
+            pregBtn.style.display = 'none';
+            patientContext.pregnancy = false;
+        } else {
+            pregBtn.style.display = 'flex';
+        }
+    });
+
+    // ── Clinical Engine runner ─────────────────────────────
+    let engineTimer = null;
+    function runClinicalEngine() {
+        clearTimeout(engineTimer);
+        engineTimer = setTimeout(() => {
+            const diag = document.getElementById('diagnosis').value;
+            const comp = document.getElementById('complaint').value;
+            if (!diag && !comp) {
+                document.getElementById('diseasePanel').classList.remove('show');
+                document.getElementById('aiBanner').classList.remove('show');
+                document.getElementById('emergencyBar').classList.remove('show');
+                document.getElementById('testAi').classList.remove('show');
+                document.getElementById('adviceAi').classList.remove('show');
                 return;
             }
-        } catch(e) {}
-        addMedRow(); // default empty row
+
+            const result = ClinicalEngine.getSuggestions(diag, comp, patientContext);
+            if (!result.diseases.length) {
+                document.getElementById('diseasePanel').classList.remove('show');
+                document.getElementById('aiBanner').classList.remove('show');
+                return;
+            }
+
+            renderDiseasePanel(result);
+            renderEmergencyBar(result.emergencyFlags);
+            renderMedicineSuggestions(result.suggestions);
+            renderTestSuggestions(result.tests);
+            renderAdviceSuggestions(result.advice);
+
+            // Warnings toast
+            if (result.warnings.length > 0) {
+                toast(result.warnings[0], 'warn');
+            }
+        }, 500);
     }
 
-    // ── Collect form ──
+    document.getElementById('diagnosis').addEventListener('input', runClinicalEngine);
+    document.getElementById('complaint').addEventListener('input', runClinicalEngine);
+
+    // ── Render disease info panel ──────────────────────────
+    function renderDiseasePanel(result) {
+        const panel = document.getElementById('diseasePanel');
+        panel.innerHTML = result.diseases.map(d => `
+            <div class="dp-head">
+                <div class="dp-name">${esc(d.name)}</div>
+                ${d.icd10 ? `<span class="dp-icd">ICD-10: ${esc(d.icd10)}</span>` : ''}
+            </div>
+            ${d.note ? `<div class="dp-note">📌 ${esc(d.note)}</div>` : ''}
+        `).join('<hr style="border:none;border-top:1px solid rgba(255,255,255,.07);margin:8px 0;">');
+        panel.classList.add('show');
+    }
+
+    // ── Emergency flags ────────────────────────────────────
+    function renderEmergencyBar(flags) {
+        const bar = document.getElementById('emergencyBar');
+        const list = document.getElementById('emergencyList');
+        if (!flags || !flags.length) { bar.classList.remove('show'); return; }
+        list.innerHTML = flags.map(f => `<li>${esc(f)}</li>`).join('');
+        bar.classList.add('show');
+    }
+
+    // ── Medicine suggestions ───────────────────────────────
+    function renderMedicineSuggestions(suggestions) {
+        const banner = document.getElementById('aiBanner');
+        const chips = document.getElementById('aiChips');
+        const ctx = document.getElementById('aiBannerCtx');
+
+        if (!suggestions.length) { banner.classList.remove('show'); return; }
+
+        // Context label
+        const activeCtx = Object.entries(patientContext).filter(([,v]) => v).map(([k]) => k);
+        ctx.textContent = activeCtx.length ? `Context: ${activeCtx.join(', ')}` : 'General patient';
+
+        chips.innerHTML = suggestions.map(s => {
+            const warn = s.safetyWarnings && s.safetyWarnings.length;
+            return `
+            <div class="suggest-chip ${warn?'flagged':''}" data-name="${esc(s.name)}">
+                <i class="fas fa-${warn?'exclamation-triangle':'plus-circle'}" style="color:${warn?'#f59e0b':'var(--teal)'}"></i>
+                ${esc(s.name)}
+                ${warn ? `<span class="chip-warning">${esc(s.safetyWarnings[0].replace(/[⚠️⛔]/g,'').trim())}</span>` : ''}
+            </div>`;
+        }).join('');
+
+        banner.classList.add('show');
+
+        chips.querySelectorAll('.suggest-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                addMedRow(chip.dataset.name);
+                chip.classList.add('added');
+                chip.innerHTML = `<i class="fas fa-check" style="color:#10b981"></i> ${chip.dataset.name}`;
+            });
+        });
+    }
+
+    // ── Test suggestions ───────────────────────────────────
+    function renderTestSuggestions(tests) {
+        const area = document.getElementById('testAi');
+        const chips = document.getElementById('testChips');
+        if (!tests.length) { area.classList.remove('show'); return; }
+        chips.innerHTML = tests.map(t =>
+            `<span class="test-chip" data-test="${esc(t)}"><i class="fas fa-plus"></i> ${esc(t)}</span>`
+        ).join('');
+        area.classList.add('show');
+        chips.querySelectorAll('.test-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                const cur = document.getElementById('labTests').value.trim();
+                const t = chip.dataset.test;
+                if (!cur.toLowerCase().includes(t.toLowerCase())) {
+                    document.getElementById('labTests').value = cur ? cur + ', ' + t : t;
+                }
+                chip.classList.add('added');
+            });
+        });
+    }
+
+    // ── Advice suggestions ─────────────────────────────────
+    function renderAdviceSuggestions(adviceList) {
+        const area = document.getElementById('adviceAi');
+        const items = document.getElementById('adviceItems');
+        if (!adviceList.length) { area.classList.remove('show'); return; }
+        items.innerHTML = adviceList.map(a => `
+            <div class="advice-item" data-txt="${esc(a)}">
+                <div class="advice-add"><i class="fas fa-plus"></i></div>
+                <div class="advice-text">${esc(a)}</div>
+            </div>`
+        ).join('');
+        area.classList.add('show');
+        items.querySelectorAll('.advice-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const cur = document.getElementById('advice').value.trim();
+                const txt = item.dataset.txt;
+                if (!cur.includes(txt)) {
+                    document.getElementById('advice').value = cur ? cur + '\n• ' + txt : '• ' + txt;
+                }
+                item.style.opacity = '0.4';
+                item.style.pointerEvents = 'none';
+            });
+        });
+    }
+
+    // ── Add medicine row ───────────────────────────────────
+    function addMedRow(name='', dose='', duration='', instructions='') {
+        medCount++;
+        const id = medCount;
+        const tr = document.createElement('tr');
+        tr.className = 'med-row';
+        tr.innerHTML = `
+            <td>
+                <div class="med-input-wrap">
+                    <input class="med-input med-name" type="text" placeholder="Type medicine name..." value="${esc(name)}" autocomplete="off" data-row="${id}">
+                    <div class="ac-list" id="ac-${id}"></div>
+                </div>
+            </td>
+            <td><input class="med-input med-dose" type="text" placeholder="1+1+1" value="${esc(dose)}"></td>
+            <td><input class="med-input med-dur" type="text" placeholder="5 days" value="${esc(duration)}"></td>
+            <td>
+                <select class="inst-select med-inst">
+                    <option value="">Select...</option>
+                    <option ${instructions==='After meal'?'selected':''}>After meal</option>
+                    <option ${instructions==='Before meal'?'selected':''}>Before meal</option>
+                    <option ${instructions==='Empty stomach'?'selected':''}>Empty stomach</option>
+                    <option ${instructions==='With water'?'selected':''}>With water</option>
+                    <option ${instructions==='At bedtime'?'selected':''}>At bedtime</option>
+                    <option ${instructions==='Morning only'?'selected':''}>Morning only</option>
+                    <option ${instructions==='Night only'?'selected':''}>Night only</option>
+                    <option ${instructions==='As directed'?'selected':''}>As directed</option>
+                    <option ${instructions==='No restriction'?'selected':''}>No restriction</option>
+                </select>
+            </td>
+            <td><div id="vb-${id}" style="min-height:20px;"></div></td>
+            <td><button class="remove-med" type="button"><i class="fas fa-times"></i></button></td>
+        `;
+        document.getElementById('medBody').appendChild(tr);
+
+        const nameInput = tr.querySelector('.med-name');
+        const acList = document.getElementById(`ac-${id}`);
+
+        // Auto-fill instructions from registry if known medicine
+        if (name) {
+            const med = MedicineRegistry.get(name);
+            if (med && med.timing && !instructions) {
+                tr.querySelector('.med-inst').value = med.timing;
+            }
+            validateAndBadge(nameInput, id);
+        }
+
+        // Autocomplete
+        nameInput.addEventListener('input', () => {
+            const q = nameInput.value.trim();
+            if (q.length < 2) { acList.classList.remove('show'); return; }
+            const results = MedicineRegistry.search(q);
+            if (!results.length) { acList.classList.remove('show'); return; }
+            acList.innerHTML = results.map(r => {
+                const safety = MedicineRegistry.isSafeFor(r.name, patientContext);
+                const hasWarn = safety.warnings.length > 0;
+                return `<div class="ac-item" data-name="${esc(r.name)}" data-timing="${esc(r.timing||'')}">
+                    <div style="flex:1;min-width:0;">
+                        <div class="ac-name">${highlight(r.name, q)}</div>
+                        <div class="ac-generic">${esc(r.generic)}</div>
+                        ${hasWarn ? `<span class="ac-safe-warn">${esc(safety.warnings[0].replace(/[⚠️⛔]/g,'').trim())}</span>` : ''}
+                    </div>
+                    <div class="ac-cat">${esc(r.category)}</div>
+                </div>`;
+            }).join('');
+            acList.classList.add('show');
+            acList.querySelectorAll('.ac-item').forEach(item => {
+                item.addEventListener('mousedown', e => {
+                    e.preventDefault();
+                    nameInput.value = item.dataset.name;
+                    acList.classList.remove('show');
+                    // Auto-fill timing
+                    if (item.dataset.timing) {
+                        const instSel = tr.querySelector('.med-inst');
+                        if (!instSel.value) instSel.value = item.dataset.timing;
+                    }
+                    validateAndBadge(nameInput, id);
+                });
+            });
+        });
+
+        nameInput.addEventListener('blur', () => {
+            setTimeout(() => acList.classList.remove('show'), 180);
+            if (nameInput.value.trim().length > 1) validateAndBadge(nameInput, id);
+        });
+
+        // Remove
+        tr.querySelector('.remove-med').addEventListener('click', () => tr.remove());
+
+        // Track dose focus for chips
+        tr.querySelector('.med-dose').addEventListener('focus', function() { lastDoseInput = this; });
+
+        // Autosave
+        tr.querySelectorAll('input,select').forEach(i =>
+            i.addEventListener('input', () => { clearTimeout(window._as); window._as = setTimeout(autosave, 1500); })
+        );
+    }
+
+    // ── Validate medicine + show safety badge ──────────────
+    function validateAndBadge(input, rowId) {
+        const name = input.value.trim();
+        const vb = document.getElementById(`vb-${rowId}`);
+        if (!name) { vb.innerHTML = ''; return; }
+        const result = ClinicalEngine.validateMedicine(name, patientContext);
+        if (!result) { vb.innerHTML = ''; return; }
+        if (!result.found) {
+            vb.innerHTML = `<span class="val-chip warn"><i class="fas fa-question-circle"></i> Unknown</span>`;
+            input.classList.remove('valid','danger');
+        } else if (result.warnings.length > 0) {
+            vb.innerHTML = `<span class="val-chip danger" title="${esc(result.warnings.join(', '))}"><i class="fas fa-exclamation-triangle"></i> Caution</span>`;
+            input.classList.add('danger'); input.classList.remove('valid');
+            toast(`⚠️ ${name}: ${result.warnings[0]}`, 'warn');
+        } else {
+            vb.innerHTML = `<span class="val-chip ok"><i class="fas fa-check"></i> Safe</span>`;
+            input.classList.add('valid'); input.classList.remove('danger');
+        }
+    }
+
+    function highlight(text, query) {
+        const i = text.toLowerCase().indexOf(query.toLowerCase());
+        if (i < 0) return esc(text);
+        return esc(text.slice(0,i)) + `<strong style="color:var(--teal)">${esc(text.slice(i,i+query.length))}</strong>` + esc(text.slice(i+query.length));
+    }
+
+    // Add first empty row
+    addMedRow();
+    document.getElementById('addMedBtn').addEventListener('click', () => addMedRow());
+
+    // Dose chips
+    document.querySelectorAll('.dose-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            if (lastDoseInput) { lastDoseInput.value = chip.dataset.dose; }
+            else {
+                const doses = document.querySelectorAll('.med-dose');
+                if (doses.length) doses[doses.length-1].value = chip.dataset.dose;
+            }
+        });
+    });
+
+    // ── Collect form ───────────────────────────────────────
     function collectForm() {
         const meds = [];
         document.querySelectorAll('.med-row').forEach(r => {
@@ -530,258 +873,122 @@
             labTests: document.getElementById('labTests').value.trim(),
             advice: document.getElementById('advice').value.trim(),
             followupDate: document.getElementById('followupDate').value,
+            patientContext: { ...patientContext },
             medicines: meds
         };
     }
 
-    // ── AI: Diagnosis → suggest medicines + tests ──
-    let diagTimer = null;
-    function onDiagnosisChange() {
-        clearTimeout(diagTimer);
-        diagTimer = setTimeout(() => {
-            const diag = document.getElementById('diagnosis').value;
-            const comp = document.getElementById('complaint').value;
-
-            // Medicines suggestions
-            const medSugs = MedicalData.getSuggestedMedicines(diag, comp);
-            const banner = document.getElementById('aiMedBanner');
-            const chips = document.getElementById('aiMedChips');
-            if (medSugs.length > 0) {
-                chips.innerHTML = medSugs.map(m =>
-                    `<div class="suggest-chip" data-med="${escH(m)}">
-                        <i class="fas fa-plus-circle"></i> ${escH(m)}
-                    </div>`
-                ).join('');
-                banner.classList.add('show');
-                // Click to add
-                chips.querySelectorAll('.suggest-chip').forEach(chip => {
-                    chip.addEventListener('click', () => {
-                        addMedRow(chip.dataset.med);
-                        chip.style.opacity = '0.4';
-                        chip.style.pointerEvents = 'none';
-                        chip.innerHTML = `<i class="fas fa-check"></i> ${chip.dataset.med}`;
-                        chip.style.color = '#10b981';
-                        chip.style.borderColor = '#10b981';
-                    });
-                });
-            } else {
-                banner.classList.remove('show');
-            }
-
-            // Test suggestions
-            const testSugs = MedicalData.getSuggestedTests(diag, comp);
-            const testArea = document.getElementById('testSuggest');
-            const testChipsEl = document.getElementById('testChips');
-            if (testSugs.length > 0) {
-                testChipsEl.innerHTML = testSugs.map(t =>
-                    `<span class="test-chip" data-test="${escH(t)}"><i class="fas fa-plus"></i> ${escH(t)}</span>`
-                ).join('');
-                testArea.classList.add('show');
-                testChipsEl.querySelectorAll('.test-chip').forEach(chip => {
-                    chip.addEventListener('click', () => {
-                        const cur = document.getElementById('labTests').value.trim();
-                        const t = chip.dataset.test;
-                        if (!cur.includes(t)) {
-                            document.getElementById('labTests').value = cur ? cur + ', ' + t : t;
-                        }
-                        chip.style.opacity = '0.4';
-                        chip.style.pointerEvents = 'none';
-                    });
-                });
-            } else {
-                testArea.classList.remove('show');
-            }
-        }, 600);
+    // ── Autosave ───────────────────────────────────────────
+    function autosave() {
+        try {
+            localStorage.setItem('curepd_draft', JSON.stringify(collectForm()));
+            const now = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+            document.getElementById('autoSaveLbl').innerHTML =
+                `<i class="fas fa-circle" style="font-size:7px;color:#4ade80"></i> Saved ${now}`;
+        } catch(e) {}
     }
 
-    document.getElementById('diagnosis').addEventListener('input', onDiagnosisChange);
-    document.getElementById('complaint').addEventListener('input', onDiagnosisChange);
-
-    // ── Medicine row ──
-    let medCount = 0;
-    function addMedRow(name='', dose='', duration='', instructions='') {
-        medCount++;
-        const id = medCount;
-        const tr = document.createElement('tr');
-        tr.className = 'med-row';
-        tr.dataset.rowId = id;
-        tr.innerHTML = `
-            <td>
-                <div class="med-input-wrap">
-                    <input class="med-input med-name" type="text" placeholder="Type medicine name..." value="${escH(name)}" autocomplete="off" data-row="${id}">
-                    <div class="autocomplete-list" id="ac-${id}"></div>
-                </div>
-            </td>
-            <td><input class="med-input med-dose" type="text" placeholder="1+1+1" value="${escH(dose)}"></td>
-            <td><input class="med-input med-dur" type="text" placeholder="5 days" value="${escH(duration)}"></td>
-            <td>
-                <select class="inst-select med-inst">
-                    <option value="">Select...</option>
-                    <option value="After meal" ${instructions==='After meal'?'selected':''}>After meal</option>
-                    <option value="Before meal" ${instructions==='Before meal'?'selected':''}>Before meal</option>
-                    <option value="Empty stomach" ${instructions==='Empty stomach'?'selected':''}>Empty stomach</option>
-                    <option value="With water" ${instructions==='With water'?'selected':''}>With water</option>
-                    <option value="At bedtime" ${instructions==='At bedtime'?'selected':''}>At bedtime</option>
-                    <option value="Morning only" ${instructions==='Morning only'?'selected':''}>Morning only</option>
-                    <option value="Night only" ${instructions==='Night only'?'selected':''}>Night only</option>
-                    <option value="As directed" ${instructions==='As directed'?'selected':''}>As directed</option>
-                    <option value="No restriction" ${instructions==='No restriction'?'selected':''}>No restriction</option>
-                </select>
-            </td>
-            <td><span class="val-badge" id="vb-${id}" style="font-size:10px;"></span></td>
-            <td><button class="remove-med" type="button"><i class="fas fa-times"></i></button></td>
-        `;
-        document.getElementById('medBody').appendChild(tr);
-
-        const nameInput = tr.querySelector('.med-name');
-        const acList = document.getElementById(`ac-${id}`);
-
-        // Autocomplete
-        nameInput.addEventListener('input', () => {
-            const q = nameInput.value.trim();
-            if (q.length < 2) { acList.classList.remove('show'); return; }
-            const results = MedicalData.searchMedicines(q);
-            if (!results.length) { acList.classList.remove('show'); return; }
-            acList.innerHTML = results.map(r =>
-                `<div class="ac-item" data-name="${escH(r.name)}">
-                    <div><div class="ac-name">${highlight(r.name, q)}</div>
-                    <div class="ac-generic">${escH(r.generic)}</div></div>
-                    <div class="ac-cat">${escH(r.category)}</div>
-                </div>`
-            ).join('');
-            acList.classList.add('show');
-            acList.querySelectorAll('.ac-item').forEach(item => {
-                item.addEventListener('mousedown', e => {
-                    e.preventDefault();
-                    nameInput.value = item.dataset.name;
-                    acList.classList.remove('show');
-                    nameInput.classList.add('valid');
-                    const vb = document.getElementById(`vb-${id}`);
-                    vb.textContent = '✓';
-                    vb.style.color = '#10b981';
-                });
+    function loadDraft() {
+        try {
+            const d = JSON.parse(localStorage.getItem('curepd_draft') || 'null');
+            if (!d) { addMedRow(); return; }
+            ['patientName','patientPhone','patientAge','patientGender','patientBlood',
+             'complaint','diagnosis','labTests','advice','followupDate'].forEach(id => {
+                if (d[id] && document.getElementById(id)) document.getElementById(id).value = d[id];
             });
-        });
-
-        nameInput.addEventListener('blur', () => { setTimeout(() => acList.classList.remove('show'), 150); });
-
-        // Remove
-        tr.querySelector('.remove-med').addEventListener('click', () => tr.remove());
-
-        // Autosave on change
-        tr.querySelectorAll('input,select').forEach(i => {
-            i.addEventListener('input', () => { clearTimeout(window._as); window._as = setTimeout(autosave, 1500); });
-        });
-
-        // Track last dose focus for chips
-        tr.querySelector('.med-dose').addEventListener('focus', function() { lastDoseInput = this; });
-    }
-
-    function highlight(text, query) {
-        const i = text.toLowerCase().indexOf(query.toLowerCase());
-        if (i < 0) return escH(text);
-        return escH(text.slice(0,i)) +
-            `<strong style="color:var(--teal)">${escH(text.slice(i,i+query.length))}</strong>` +
-            escH(text.slice(i+query.length));
-    }
-
-    document.getElementById('addMedBtn').addEventListener('click', () => addMedRow());
-
-    // Dose chips
-    document.querySelectorAll('.dose-chip').forEach(chip => {
-        chip.addEventListener('click', () => {
-            if (lastDoseInput) { lastDoseInput.value = chip.dataset.dose; lastDoseInput.dispatchEvent(new Event('input')); }
-            else {
-                // apply to last empty dose
-                const doses = document.querySelectorAll('.med-dose');
-                if (doses.length) { doses[doses.length-1].value = chip.dataset.dose; }
+            if (d.patientContext) {
+                Object.entries(d.patientContext).forEach(([k,v]) => {
+                    if (v) {
+                        patientContext[k] = true;
+                        const btn = document.getElementById(`ctx-${k}`);
+                        if (btn) btn.classList.add('active');
+                    }
+                });
             }
-        });
-    });
+            if (d.medicines && d.medicines.length) {
+                document.getElementById('medBody').innerHTML = '';
+                d.medicines.forEach(m => addMedRow(m.name, m.dose, m.duration, m.instructions));
+            } else {
+                addMedRow();
+            }
+            // Re-run engine
+            runClinicalEngine();
+        } catch(e) { addMedRow(); }
+    }
 
-    // ── AI Summary ──
+    // ── AI Summary ────────────────────────────────────────
     document.getElementById('aiSumBtn').addEventListener('click', async () => {
         const d = collectForm();
-        if (!d.complaint && !d.diagnosis && !d.medicines.length) {
-            toast('Fill complaint, diagnosis, or medicines first.', 'info'); return;
-        }
         const btn = document.getElementById('aiSumBtn');
         btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Generating...';
         btn.disabled = true;
         const medList = d.medicines.map(m=>`${m.name}(${m.dose||'?'},${m.duration||'?'})`).join(', ')||'None';
-        const prompt = `Write a brief 2-3 sentence clinical visit summary for a doctor's record.
-Patient: ${d.patientName||'Unknown'}, Age: ${d.patientAge||'N/A'}, Gender: ${d.patientGender||'N/A'}.
+        const ctxStr = Object.entries(d.patientContext||{}).filter(([,v])=>v).map(([k])=>k).join(', ')||'None';
+        const prompt = `Clinical visit summary for doctor's record.
+Patient: ${d.patientName||'N/A'}, Age: ${d.patientAge||'N/A'}, Gender: ${d.patientGender||'N/A'}. Risk factors: ${ctxStr}.
 Complaint: ${d.complaint||'N/A'}. Diagnosis: ${d.diagnosis||'N/A'}. Medicines: ${medList}. Tests: ${d.labTests||'None'}.
-Write in professional English starting with "Patient presented with..."`;
+Write 2-3 concise professional sentences starting with "Patient presented with..."`;
         try {
             const res = await fetch('https://api.anthropic.com/v1/messages', {
-                method:'POST', headers:{'Content-Type':'application/json'},
-                body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:200,
-                    messages:[{role:'user',content:prompt}] })
+                method:'POST',headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:200,messages:[{role:'user',content:prompt}]})
             });
             const data = await res.json();
-            const txt = data.content?.[0]?.text || 'Could not generate.';
             const el = document.getElementById('aiSumText');
-            el.textContent = txt; el.style.fontStyle='normal'; el.style.color='rgba(255,255,255,.75)';
+            el.textContent = data.content?.[0]?.text||'Could not generate.';
+            el.style.fontStyle='normal';el.style.color='rgba(255,255,255,.78)';
         } catch(e) {
-            document.getElementById('aiSumText').textContent = 'AI unavailable. Save prescription to retry.';
+            document.getElementById('aiSumText').textContent='AI unavailable.';
         }
-        btn.innerHTML = '<i class="fas fa-magic"></i> Regenerate';
-        btn.disabled = false;
+        btn.innerHTML='<i class="fas fa-magic"></i> Regenerate';btn.disabled=false;
     });
 
-    // ── SAVE ──
+    // ── Save ──────────────────────────────────────────────
     async function save() {
-        if (!currentUser) { toast('Please login.', 'err'); return; }
+        if (!currentUser) { toast('Please login.','err'); return; }
         const d = collectForm();
-        if (!d.patientName) { toast('Patient name is required.','err'); document.getElementById('patientName').focus(); return; }
-        if (!d.complaint) { toast('Chief complaint is required.','err'); document.getElementById('complaint').focus(); return; }
+        if (!d.patientName) { toast('Patient name required.','err'); return; }
+        if (!d.complaint) { toast('Chief complaint required.','err'); return; }
         if (!d.medicines.length) { toast('Add at least one medicine.','err'); return; }
         const btn = document.getElementById('saveBtn');
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Saving...';
+        btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-pulse"></i> Saving...';
         try {
             const ref = await db.collection('prescriptions').add({
-                ...d, doctorId: currentUser.uid, doctorName: doctorData.name||'',
-                date: new Date().toISOString().split('T')[0],
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                ...d, doctorId:currentUser.uid, doctorName:doctorData.name||'',
+                date:new Date().toISOString().split('T')[0],
+                createdAt:firebase.firestore.FieldValue.serverTimestamp()
             });
             localStorage.removeItem('curepd_draft');
-            toast('Saved! Redirecting...', 'ok');
-            setTimeout(() => window.location.href=`view.html?id=${ref.id}`, 1400);
+            toast('Saved! Redirecting...','ok');
+            setTimeout(()=>window.location.href=`view.html?id=${ref.id}`,1400);
         } catch(err) {
             toast('Error: '+err.message,'err');
-            btn.disabled=false; btn.innerHTML='<i class="fas fa-cloud-upload-alt"></i> Save Prescription';
+            btn.disabled=false;btn.innerHTML='<i class="fas fa-cloud-upload-alt"></i> Save Prescription';
         }
     }
 
-    // ── PDF ──
+    // ── PDF ──────────────────────────────────────────────
     async function makePDF() {
         const d = collectForm();
-        const meds = d.medicines.map((m,i)=>`<tr>
-            <td style="padding:8px 10px;border-bottom:1px solid #eee;">${i+1}. ${m.name}</td>
-            <td style="padding:8px 10px;border-bottom:1px solid #eee;">${m.dose||'—'}</td>
-            <td style="padding:8px 10px;border-bottom:1px solid #eee;">${m.duration||'—'}</td>
-            <td style="padding:8px 10px;border-bottom:1px solid #eee;">${m.instructions||'—'}</td>
-        </tr>`).join('');
+        const meds = d.medicines.map((m,i)=>`<tr><td>${i+1}. ${m.name}</td><td>${m.dose||'—'}</td><td>${m.duration||'—'}</td><td>${m.instructions||'—'}</td></tr>`).join('');
         const html = `<div style="font-family:sans-serif;max-width:720px;padding:24px;">
             <div style="display:flex;justify-content:space-between;border-bottom:2px solid #0fa99e;padding-bottom:14px;margin-bottom:20px;">
-                <div><h1 style="color:#0fa99e;margin:0;font-size:22px;">CurePd Rx</h1><p style="color:#888;font-size:12px;margin:2px 0;">Digital Prescription · Bangladesh</p></div>
-                <div style="text-align:right;font-size:12px;"><strong>Dr. ${doctorData.name||''}</strong><br>${doctorData.clinic||''}</div>
+                <div><h1 style="color:#0fa99e;margin:0;font-size:22px;">CurePd Rx</h1><p style="color:#888;font-size:12px;">Digital Prescription · Bangladesh</p></div>
+                <div style="text-align:right;font-size:12px;"><strong>Dr. ${esc(doctorData.name||'')}</strong><br>${esc(doctorData.clinic||'')}</div>
             </div>
             <table style="width:100%;font-size:13px;margin-bottom:16px;"><tr>
-                <td><b>Patient:</b> ${d.patientName}</td><td><b>Age:</b> ${d.patientAge||'—'}</td>
-                <td><b>Phone:</b> ${d.patientPhone||'—'}</td><td><b>Date:</b> ${new Date().toLocaleDateString('en-GB')}</td>
+                <td><b>Patient:</b> ${esc(d.patientName)}</td><td><b>Age:</b> ${esc(d.patientAge||'—')}</td>
+                <td><b>Phone:</b> ${esc(d.patientPhone||'—')}</td><td><b>Date:</b> ${new Date().toLocaleDateString('en-GB')}</td>
             </tr></table>
-            ${d.complaint?`<p style="font-size:13px;margin-bottom:6px;"><b>Complaint:</b> ${d.complaint}</p>`:''}
-            ${d.diagnosis?`<p style="font-size:13px;margin-bottom:14px;"><b>Diagnosis:</b> ${d.diagnosis}</p>`:''}
-            <h3 style="font-size:14px;border-bottom:1px solid #eee;padding-bottom:6px;margin-bottom:0;">Medicines</h3>
-            <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:14px;">
-                <thead><tr style="background:#f4f7fb;"><th style="padding:8px 10px;text-align:left;">Medicine</th><th style="padding:8px 10px;">Dosage</th><th style="padding:8px 10px;">Duration</th><th style="padding:8px 10px;">Instructions</th></tr></thead>
+            ${d.complaint?`<p style="font-size:13px;margin-bottom:6px;"><b>Complaint:</b> ${esc(d.complaint)}</p>`:''}
+            ${d.diagnosis?`<p style="font-size:13px;margin-bottom:14px;"><b>Diagnosis:</b> ${esc(d.diagnosis)}</p>`:''}
+            <h3 style="font-size:14px;border-bottom:1px solid #eee;padding-bottom:6px;">Medicines</h3>
+            <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                <thead><tr style="background:#f4f7fb;"><th style="padding:8px;text-align:left;">Medicine</th><th>Dosage</th><th>Duration</th><th>Instructions</th></tr></thead>
                 <tbody>${meds}</tbody>
             </table>
-            ${d.labTests?`<p style="font-size:13px;"><b>Tests:</b> ${d.labTests}</p>`:''}
-            ${d.advice?`<p style="font-size:13px;"><b>Advice:</b> ${d.advice}</p>`:''}
+            ${d.labTests?`<p style="font-size:13px;margin-top:12px;"><b>Tests:</b> ${esc(d.labTests)}</p>`:''}
+            ${d.advice?`<p style="font-size:13px;"><b>Advice:</b> ${esc(d.advice)}</p>`:''}
         </div>`;
         const wrap = document.createElement('div');
         wrap.innerHTML = html; document.body.appendChild(wrap);
@@ -789,21 +996,15 @@ Write in professional English starting with "Patient presented with..."`;
             .then(()=>document.body.removeChild(wrap));
     }
 
-    // ── Helpers ──
-    function escH(s) {
-        if (!s) return '';
-        return s.replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-    }
-
-    // Autosave on any input
+    // Autosave on input
     document.addEventListener('input', e => {
         if (e.target.closest('.layout')) { clearTimeout(window._as); window._as = setTimeout(autosave, 2000); }
     });
     document.addEventListener('change', e => {
-        if (e.target.closest('.layout')) { clearTimeout(window._as); window._as = setTimeout(autosave, 1000); }
+        if (e.target.closest('.layout')) { clearTimeout(window._as); window._as = setTimeout(autosave, 800); }
     });
 
-    // Bind buttons
+    // Bindings
     document.getElementById('saveBtn').addEventListener('click', save);
     document.getElementById('printBtn').addEventListener('click', ()=>window.print());
     document.getElementById('pdfBtn').addEventListener('click', makePDF);
@@ -816,9 +1017,9 @@ Write in professional English starting with "Patient presented with..."`;
         if (!user) { window.location.href='index.html'; return; }
         currentUser = user;
         const snap = await db.collection('doctors').doc(user.uid).get();
-        doctorData = snap.exists ? snap.data() : { name: user.email.split('@')[0] };
+        doctorData = snap.exists ? snap.data() : {name:user.email.split('@')[0]};
         document.getElementById('sbDrName').textContent = 'Dr. '+(doctorData.name||'');
-        document.getElementById('sbDrReg').textContent = doctorData.registration ? 'BMDC: '+doctorData.registration : '';
+        document.getElementById('sbDrReg').textContent = doctorData.registration?'BMDC: '+doctorData.registration:'';
         document.getElementById('sbDrSpec').textContent = doctorData.speciality||'';
         document.getElementById('sbDrClinic').textContent = doctorData.clinic||'';
         loadDraft();
