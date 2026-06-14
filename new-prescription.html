@@ -253,6 +253,146 @@
         .tips-lbl{font-size:10px;font-weight:600;color:var(--teal);text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px;}
         .tips p{font-size:12px;color:var(--text-muted);line-height:1.75;}
 
+        /* ── PREVIEW MODAL ───────────────────────────────── */
+        .preview-overlay{
+            position:fixed;inset:0;z-index:1000;
+            background:rgba(10,16,25,0.78);backdrop-filter:blur(6px);
+            display:flex;align-items:flex-start;justify-content:center;
+            padding:24px 16px 32px;overflow-y:auto;
+            opacity:0;pointer-events:none;transition:opacity .25s;
+        }
+        .preview-overlay.show{opacity:1;pointer-events:all;}
+        .preview-modal{
+            width:100%;max-width:720px;background:white;
+            border-radius:18px;overflow:hidden;
+            box-shadow:0 32px 80px rgba(0,0,0,0.45);
+            transform:translateY(20px);transition:transform .28s cubic-bezier(.22,1,.36,1);
+            flex-shrink:0;
+        }
+        .preview-overlay.show .preview-modal{transform:translateY(0);}
+
+        /* Modal top bar */
+        .pm-topbar{
+            background:var(--navy);padding:14px 20px;
+            display:flex;align-items:center;justify-content:space-between;
+        }
+        .pm-topbar-left{display:flex;align-items:center;gap:10px;}
+        .pm-topbar-title{font-family:'DM Serif Display',serif;font-size:16px;color:white;}
+        .pm-topbar-sub{font-size:11px;color:rgba(255,255,255,.4);margin-top:1px;}
+        .pm-close-btn{
+            width:32px;height:32px;border-radius:8px;border:none;cursor:pointer;
+            background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);
+            display:flex;align-items:center;justify-content:center;font-size:14px;
+            transition:all .2s;
+        }
+        .pm-close-btn:hover{background:rgba(239,68,68,.25);color:#fca5a5;}
+
+        /* Prescription paper inside modal */
+        .pm-paper{padding:32px 36px;}
+        .pm-stripe{height:4px;background:linear-gradient(90deg,var(--teal),var(--teal-light));}
+        .pm-header{
+            display:flex;justify-content:space-between;align-items:flex-start;
+            padding-bottom:16px;margin-bottom:20px;
+            border-bottom:1.5px solid var(--border);
+        }
+        .pm-brand{font-family:'DM Serif Display',serif;font-size:24px;color:var(--teal);}
+        .pm-brand-sub{font-size:11px;color:var(--text-muted);margin-top:3px;}
+        .pm-dr-name{font-size:14px;font-weight:600;color:var(--text-main);text-align:right;}
+        .pm-dr-detail{font-size:11px;color:var(--text-muted);line-height:1.7;text-align:right;}
+
+        .pm-patient{
+            background:#f8fafc;border:1px solid var(--border);border-radius:9px;
+            padding:12px 16px;display:grid;grid-template-columns:repeat(4,1fr);
+            gap:10px;margin-bottom:18px;
+        }
+        .pm-pf-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-bottom:2px;}
+        .pm-pf-val{font-size:13px;font-weight:500;color:var(--text-main);}
+
+        .pm-section-title{
+            font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;
+            color:var(--teal);margin-bottom:9px;
+            display:flex;align-items:center;gap:6px;
+        }
+        .pm-section-title::after{content:'';flex:1;height:1px;background:rgba(15,169,158,.2);}
+
+        .pm-clinical{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;}
+        .pm-cbox{background:var(--bg);border-radius:8px;padding:11px 14px;}
+        .pm-clabel{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-bottom:4px;}
+        .pm-cval{font-size:12px;color:var(--text-main);line-height:1.5;}
+
+        .pm-med-table{width:100%;border-collapse:collapse;margin-bottom:18px;}
+        .pm-med-table th{
+            padding:8px 10px;text-align:left;font-size:9px;font-weight:600;
+            text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);
+            background:var(--bg);border-bottom:1px solid var(--border);
+        }
+        .pm-med-table td{
+            padding:10px 10px;font-size:12px;color:var(--text-main);
+            border-bottom:1px solid #f0f3f8;vertical-align:top;
+        }
+        .pm-med-table tr:last-child td{border-bottom:none;}
+        .pm-med-num{
+            width:20px;height:20px;border-radius:50%;
+            background:rgba(15,169,158,.1);color:var(--teal);
+            display:inline-flex;align-items:center;justify-content:center;
+            font-size:10px;font-weight:700;margin-right:5px;
+        }
+        .pm-dose{
+            background:var(--navy);color:var(--teal-light);
+            font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;font-family:monospace;
+        }
+        .pm-inst{
+            background:#f0fdf4;color:#065f46;font-size:10px;
+            padding:2px 7px;border-radius:4px;border:1px solid #bbf7d0;
+        }
+
+        .pm-tests{background:var(--bg);border-radius:8px;padding:11px 14px;margin-bottom:16px;}
+        .pm-test-tag{
+            display:inline-block;background:white;border:1px solid var(--border);
+            border-radius:5px;padding:2px 9px;font-size:11px;margin:2px 3px 2px 0;
+        }
+
+        .pm-advice{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:11px 14px;margin-bottom:16px;}
+        .pm-advice-text{font-size:12px;color:#92400e;line-height:1.6;white-space:pre-line;}
+
+        .pm-followup{
+            display:inline-flex;align-items:center;gap:7px;
+            background:rgba(15,169,158,.06);border:1px solid rgba(15,169,158,.2);
+            border-radius:7px;padding:7px 12px;font-size:12px;color:var(--teal);margin-bottom:18px;
+        }
+
+        .pm-footer{
+            border-top:1px solid var(--border);padding-top:14px;
+            display:flex;justify-content:space-between;align-items:center;
+        }
+        .pm-footer-left{font-size:10px;color:var(--text-muted);}
+        .pm-footer-right{font-size:10px;color:var(--text-muted);text-align:right;}
+
+        /* Modal action bar */
+        .pm-actions{
+            background:var(--bg);border-top:1px solid var(--border);
+            padding:14px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+        }
+        .pm-action-note{font-size:12px;color:var(--text-muted);flex:1;min-width:160px;}
+        .pm-btn{
+            height:38px;padding:0 18px;border-radius:9px;font-family:'DM Sans',sans-serif;
+            font-size:13px;font-weight:600;cursor:pointer;
+            display:flex;align-items:center;gap:7px;transition:all .2s;
+        }
+        .pm-btn.save{background:var(--teal);color:white;border:none;box-shadow:0 2px 10px rgba(15,169,158,.3);}
+        .pm-btn.save:hover{background:var(--teal-light);}
+        .pm-btn.print{background:white;color:var(--text-main);border:1.5px solid var(--border);}
+        .pm-btn.print:hover{border-color:var(--teal);color:var(--teal);}
+        .pm-btn.close{background:white;color:var(--text-muted);border:1.5px solid var(--border);}
+        .pm-btn.close:hover{border-color:#ef4444;color:#ef4444;}
+
+        /* Empty state in preview */
+        .pm-empty{
+            text-align:center;padding:32px 20px;color:var(--text-muted);
+        }
+        .pm-empty i{font-size:36px;color:var(--border);margin-bottom:12px;display:block;}
+        .pm-empty p{font-size:13px;}
+
         /* Toast */
         .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
             background:var(--navy);color:white;padding:11px 22px;border-radius:12px;
@@ -283,6 +423,7 @@
         <span class="autosave" id="autoSaveLbl"><i class="fas fa-circle" style="font-size:7px;color:#4ade80"></i> Draft saved</span>
         <button class="btn-nav outline" id="printBtn"><i class="fas fa-print"></i> Print</button>
         <button class="btn-nav outline" id="pdfBtn"><i class="fas fa-file-pdf"></i> PDF</button>
+        <button class="btn-nav outline" id="previewBtn" style="border-color:rgba(19,196,184,.5);color:var(--teal-light);"><i class="fas fa-eye"></i> Preview</button>
         <button class="btn-nav primary" id="saveBtn"><i class="fas fa-cloud-upload-alt"></i> Save Prescription</button>
     </div>
 </nav>
